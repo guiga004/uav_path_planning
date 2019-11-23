@@ -26,12 +26,12 @@ class Environment:
         self.width = width
         self.height = height
 
-        # this needs to be populated based on width and height
-        self.cities = []
+        self.center = (width/2, height/2)
 
-    # returns the dimensions of the environment as a dictionary
-    def get_dimensions(self):
-        return {'width': self.width, 'height': self.height}
+        # populate cities based on width and height
+        # these cities are simply evenly spaced points in a graph
+        self.cities = []
+        self.get_cities()
 
     # this will collect a list of cities
     def get_cities(self):
@@ -56,20 +56,22 @@ class Draw:
     """
     This class contains methods for environment visualization
     """
-    def __init__(self):
+    def __init__(self, environment=None):
 
         self.env_fig = plt.figure()
         self.draw = self.env_fig.gca()
         self.title = ''
 
-    def draw_environment(self, width, height, title):
+        self.environment = environment
+
+    def draw_environment(self, title):
         """
-        :param width  : arbitrary units
-        :param height : arbitrary units
-        :param title  : title of the figure
-        :return       : N/A
+        :param title        : title of the figure
+        :return             : N/A
         """
         self.title = title
+        width = self.environment.width
+        height = self.environment.height
 
         for w in range(width + 1):
 
@@ -91,15 +93,26 @@ class Draw:
                     line = plt.Line2D((0, width), (h, h), lw=2, color='dimgrey')
                     self.draw.add_line(line)
 
-    def draw_cities(self, cities):
+        # draw the center point
+        circle = plt.Circle(self.environment.center, radius=0.13, fc='gold', ec='black')
+        self.draw.add_patch(circle)
+
+    def draw_cities(self):
         """
         :param cities : this is a list based off the grid
         :return       : N/A
         """
-        for city in cities:
+
+        for city in self.environment.cities:
             # plot all of the cities (as dots)
             circle = plt.Circle((city[0], city[1]), radius=0.1, fc='lightskyblue', ec='black')
             self.draw.add_patch(circle)
+
+    def draw_split(self, points):
+
+        for point in points:
+            line = plt.Line2D((self.environment.center[0], point[0]), (self.environment.center[1], point[1]), lw=3, color='green')
+            self.draw.add_line(line)
 
     def draw_path(self, path):
         """
@@ -159,33 +172,6 @@ class Draw:
         plt.close(self.env_fig)
 
 
-class UAV:
-    """
-    This class will define properties of a UAV
-    """
-    # TODO: work on this
-    def __init__(self, visibility):
-        # the visibility of a UAV is the [visibility x visibility] sized partition
-        # that the UAV is able to view from above
-        self.visibility = {'width': visibility, 'height': visibility}
-
-
-# this will define the team
-class Team:
-    """
-    This class wil define team properties
-    """
-    # TODO: work on this
-    def __init__(self, uav, ugv, flight_time):
-        self.number_of_uavs = uav
-        self.number_of_ugvs = ugv
-        self.flight_time = flight_time
-
-        # assume that all UAVs are identical
-        # all UAVs can see a 2x2 window
-        self.uav = UAV(visibility=2)
-
-
 def ant_tsp(cities):
     """
     :param cities : cities to run TSP on
@@ -205,7 +191,6 @@ def ant_tsp(cities):
     ant_route = [cities[i] for i in best['vector']]
 
     return ant_route
-
 
 def genetic_tsp(cities):
     """
@@ -228,7 +213,6 @@ def genetic_tsp(cities):
 
     return path
 
-
 def python_tsp(cities):
     """
     :param cities : cities to run TSP on
@@ -242,6 +226,41 @@ def python_tsp(cities):
 
     return python_route
 
+def get_uav_routes(environment, number_of_uavs):
+
+    # these should correspond for each uav
+    rotated_points = []
+
+    for num in range(number_of_uavs):
+
+        # create a rotation matrix to find the initial paths of all of the uavs
+        # increase the angle each iteration
+        angle = 360 / number_of_uavs
+        theta = np.radians(num*angle)
+        c, s = np.cos(theta), np.sin(theta)
+        R = np.array(((c, -s), (s, c)))
+
+        # this will calculate the new point for each drone
+        vec = np.array([np.hypot(environment.width, environment.height), environment.height/2]) - environment.center
+        rot_point = R @ vec
+        rotated_point = rot_point + environment.center
+
+        if rotated_point[0] > environment.width:
+            rotated_point[0] = environment.width
+
+        elif rotated_point[0] < 0:
+            rotated_point[0] = 0
+
+        if rotated_point[1] > environment.height:
+            rotated_point[1] = environment.height
+
+        elif rotated_point[1] < 0:
+            rotated_point[1] = 0
+
+
+        rotated_points.append(list(rotated_point))
+
+    return rotated_points
 
 # this will run a specified tsp instance on an mxn grid and plot it
 def run_tsp(tsp_algorithm, m, n, k=None, plot_title='title'):
@@ -258,22 +277,22 @@ def run_tsp(tsp_algorithm, m, n, k=None, plot_title='title'):
     land = Environment(width=m, height=n)
     cities = land.get_cities()
 
-    picasso = Draw()
-    picasso.draw_environment(width=m, height=n, title=plot_title)
-    picasso.draw_cities(cities)
+    picasso = Draw(environment=land)
+    picasso.draw_environment(title=plot_title)
+    picasso.draw_cities()
 
     start = time.time()
-
     path = tsp_algorithm(cities)
-
     end = time.time()
 
     print(f'run-time    : {round(end - start, 5)} seconds')
-
     path.append(path[0])
     path_length = picasso.draw_path(path)
-
     print(f'path length : {round(path_length, 5)} units')
+
+    routes = get_uav_routes(environment=land, number_of_uavs=k)
+
+    picasso.draw_split(routes)
 
     picasso.show_fig()
 
@@ -281,17 +300,40 @@ def run_tsp(tsp_algorithm, m, n, k=None, plot_title='title'):
 if __name__ == "__main__":
 
     # defining the dimensions of the environment
-    land_width  = 8
-    land_height = 10
+    m = 4  # width
+    n = 4  # height
+    k = 3  # number of uavs
 
-    print('\n##### ROUTE PLANNING WITH ANT COLONY ALGORITHM #####\n')
+    # print('\n##### ROUTE PLANNING WITH ANT COLONY ALGORITHM #####\n')
+    #
+    # run_tsp(ant_tsp, land_width, land_height, plot_title='Ant Algorithm Path')
+    #
+    # print('\n##### ROUTE PLANNING WITH GENETIC ALGORITHM #####\n')
+    #
+    # run_tsp(genetic_tsp, land_width, land_height, plot_title='Genetic Algorithm Path')
+    #
+    # print('\n##### ROUTE PLANNING WITH PYTHON TSP PACKAGE #####\n')
+    #
+    # run_tsp(python_tsp, land_width, land_height, k=number_of_uavs, plot_title='Python TSP Algorithm Path')
 
-    run_tsp(ant_tsp, land_width, land_height, plot_title='Ant Algorithm Path')
+    land = Environment(width=m, height=n)
+    cities = land.get_cities()
 
-    print('\n##### ROUTE PLANNING WITH GENETIC ALGORITHM #####\n')
+    picasso = Draw(environment=land)
+    picasso.draw_environment(title='Python TSP Algorithm Path')
+    picasso.draw_cities()
 
-    run_tsp(genetic_tsp, land_width, land_height, plot_title='Genetic Algorithm Path')
+    start = time.time()
+    path = python_tsp(cities)
+    end = time.time()
 
-    print('\n##### ROUTE PLANNING WITH PYTHON TSP PACKAGE #####\n')
+    # print(f'run-time    : {round(end - start, 5)} seconds')
+    # path.append(path[0])
+    # path_length = picasso.draw_path(path)
+    # print(f'path length : {round(path_length, 5)} units')
 
-    run_tsp(python_tsp, land_width, land_height, plot_title='Python TSP Algorithm Path')
+    routes = get_uav_routes(environment=land, number_of_uavs=k)
+
+    picasso.draw_split(routes)
+
+    picasso.show_fig()
