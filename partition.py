@@ -8,6 +8,7 @@ import tsp
 import numpy as np
 import time
 import matplotlib.pyplot as plt
+import copy
 
 # these are the files containing TSP algorithms
 import Ants_python as ant
@@ -51,6 +52,90 @@ class Environment:
                     self.cities.append([city_w, city_h])
 
         return self.cities
+
+    # https://stackoverflow.com/questions/2827393/angles-between-two-n-dimensional-vectors-in-python/13849249#13849249
+    @staticmethod
+    def angle_between(v1, v2):
+        """ Returns the angle in radians between vectors 'v1' and 'v2'::
+
+                >> angle_between((1, 0, 0), (0, 1, 0))
+                1.5707963267948966
+                >> angle_between((1, 0, 0), (1, 0, 0))
+                0.0
+                >> angle_between((1, 0, 0), (-1, 0, 0))
+                3.141592653589793
+        """
+
+        def unit_vector(vector):
+            """ Returns the unit vector of the vector.  """
+            return vector / np.linalg.norm(vector)
+
+        v1_u = unit_vector(v1)
+        v2_u = unit_vector(v2)
+        return np.arccos(np.clip(np.dot(v1_u, v2_u), -1.0, 1.0))
+
+    def quadrant(self, point):
+        # new vector with respect to the center point
+        v_wr_c = np.array(point) - np.array(self.center)
+
+        # center
+        if v_wr_c[0] == 0 and v_wr_c[1] == 0:
+            return 'c'
+
+        # 0 degree position:
+        elif v_wr_c[0] > 0 and v_wr_c[1] == 0:
+            return '0'
+
+        # quadrant 1
+        elif v_wr_c[0] > 0 and v_wr_c[1] > 0:
+            return 1
+
+        # 90 degree position:
+        elif v_wr_c[0] == 0 and v_wr_c[1] > 0:
+            return '90'
+
+        # quadrant 2
+        elif v_wr_c[0] < 0 and v_wr_c[1] > 0:
+            return 2
+
+        # 180 degree position:
+        elif v_wr_c[0] < 0 and v_wr_c[1] == 0:
+            return '180'
+
+        # quadrant 3
+        elif v_wr_c[0] < 0 and v_wr_c[1] < 0:
+            return 3
+
+        # 270 degree position:
+        elif v_wr_c[0] == 0 and v_wr_c[1] < 0:
+            return '270'
+
+        # quadrant 4
+        elif v_wr_c[0] > 0 and v_wr_c[1] < 0:
+            return 4
+
+    def find_angle_from_center(self, point):
+
+        if self.center == point:
+            return 'center'
+
+        # vector from center point to edge of the graph
+        center_vector = np.array([2 * self.center[0], self.center[1]]) - np.array(self.center)
+
+        # calculate new vector with respect to the center point
+        v_wr_c = np.array(point) - np.array(self.center)
+
+        # calculate the angle
+        angle = Environment.angle_between(center_vector, v_wr_c)
+
+        # calculate the position of the point for a few corner cases
+        position = Environment.quadrant(self, point)
+
+        if position == 3 or position == 4 or position == '270':
+            return math.radians(360) - angle
+
+        else:
+            return angle
 
 
 class Draw:
@@ -195,7 +280,6 @@ def ant_tsp(cities):
 
     return ant_route
 
-
 def genetic_tsp(cities):
     """
     :param cities : cities to run TSP on
@@ -218,7 +302,6 @@ def genetic_tsp(cities):
 
     return path
 
-
 def python_tsp(cities):
     """
     :param cities : cities to run TSP on
@@ -232,93 +315,13 @@ def python_tsp(cities):
 
     return python_route
 
-
-def quadrant(center, point):
-    # new vector with respect to the center point
-    v_wr_c = np.array(point) - np.array(center)
-
-    # center
-    if v_wr_c[0] == 0 and v_wr_c[1] == 0:
-        return 'c'
-
-    # 0 degree position:
-    elif v_wr_c[0] > 0 and v_wr_c[1] == 0:
-        return '0'
-
-    # quadrant 1
-    elif v_wr_c[0] > 0 and v_wr_c[1] > 0:
-        return 1
-
-    # 90 degree position:
-    elif v_wr_c[0] == 0 and v_wr_c[1] > 0:
-        return '90'
-
-    # quadrant 2
-    elif v_wr_c[0] < 0 and v_wr_c[1] > 0:
-        return 2
-
-    # 180 degree position:
-    elif v_wr_c[0] < 0 and v_wr_c[1] == 0:
-        return '180'
-
-    # quadrant 3
-    elif v_wr_c[0] < 0 and v_wr_c[1] < 0:
-        return 3
-
-    # 270 degree position:
-    elif v_wr_c[0] == 0 and v_wr_c[1] < 0:
-        return '270'
-
-    # quadrant 4
-    elif v_wr_c[0] > 0 and v_wr_c[1] < 0:
-        return 4
-
-# https://stackoverflow.com/questions/2827393/angles-between-two-n-dimensional-vectors-in-python/13849249#13849249
-def unit_vector(vector):
-    """ Returns the unit vector of the vector.  """
-    return vector / np.linalg.norm(vector)
-
-def angle_between(v1, v2):
-    """ Returns the angle in radians between vectors 'v1' and 'v2'::
-
-            >>> angle_between((1, 0, 0), (0, 1, 0))
-            1.5707963267948966
-            >>> angle_between((1, 0, 0), (1, 0, 0))
-            0.0
-            >>> angle_between((1, 0, 0), (-1, 0, 0))
-            3.141592653589793
-    """
-    v1_u = unit_vector(v1)
-    v2_u = unit_vector(v2)
-    return np.arccos(np.clip(np.dot(v1_u, v2_u), -1.0, 1.0))
-
-
-def find_angle_from_center(center, point):
-
-    if center == point:
-        return 'center'
-
-    # vector from center point to edge of the graph
-    center_vector = np.array([2*center[0], center[1]]) - np.array(center)
-
-    # calculate new vector with respect to the center point
-    v_wr_c = np.array(point) - np.array(center)
-
-    angle = angle_between(center_vector, v_wr_c)
-
-    position = quadrant(center, point)
-
-    if position == 3 or position == 4 or position == '270':
-        return math.radians(360) - angle
-
-    else:
-        return angle
-
-
 def get_uav_routes(environment, number_of_uavs):
     # these should correspond for each uav
     rotated_points = []
     angles = []
+
+    # this will hold the points for each uav
+    uav_routes = {}
 
     for num in range(number_of_uavs):
 
@@ -330,18 +333,46 @@ def get_uav_routes(environment, number_of_uavs):
         c, s = np.cos(theta), np.sin(theta)
         R = np.array(((c, -s), (s, c)))
 
-        # this will calculate the new point for each drone
+        # this will calculate the new point for each drone's boundary
+        # this is only for plotting purposes
         vec = np.array([np.hypot(environment.width, environment.height), environment.height / 2]) - environment.center
         rot_point = R @ vec
         rotated_point = rot_point + environment.center
-
         rotated_points.append(list(rotated_point))
 
-        # calculate the angle of each point and assign them to a respective drone
-        for city in environment.cities:
-            pass
+    # append 2*pi so for the points belonging to the last drone
+    angles.append(np.radians(360))
 
-    return rotated_points
+    # calculate the angle of each point and assign them to a respective drone
+    for city in environment.cities:
+
+        city_angle = environment.find_angle_from_center(city)
+
+        for i, angle in enumerate(angles):
+
+            if city_angle <= angle:
+
+                if f'{i}' not in uav_routes.keys():
+                    uav_routes.update({f'{i}': [city]})
+
+                else:
+                    uav_routes[f'{i}'].append(city)
+
+                break
+
+
+        # for i in range(len(angles)):
+        #
+        #     if city_angle < angles[i]:
+        #
+        #         if f'{i}' not in uav_routes.keys():
+        #             uav_routes.update({f'{i}': [city]})
+        #
+        #         else:
+        #             uav_routes[f'{i}'].append(city)
+        #
+
+    return uav_routes, rotated_points
 
 
 # this will run a specified tsp instance on an mxn grid and plot it
@@ -383,7 +414,7 @@ if __name__ == "__main__":
     # defining the dimensions of the environment
     m = 4  # width
     n = 4  # height
-    k = 3  # number of uavs
+    k = 5  # number of uavs
 
     # print('\n##### ROUTE PLANNING WITH ANT COLONY ALGORITHM #####\n')
     #
@@ -413,8 +444,8 @@ if __name__ == "__main__":
     # path_length = picasso.draw_path(path)
     # print(f'path length : {round(path_length, 5)} units')
 
-    routes = get_uav_routes(environment=land, number_of_uavs=k)
+    routes, split = get_uav_routes(environment=land, number_of_uavs=k)
 
-    # picasso.draw_split(routes)
+    picasso.draw_split(split)
 
     picasso.show_fig()
