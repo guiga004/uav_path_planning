@@ -18,6 +18,7 @@ class Environment:
     """
     This defines an environment, an m x n sized grid
     """
+
     def __init__(self, width, height):
         """
         :param width  : in arbitrary units
@@ -26,7 +27,7 @@ class Environment:
         self.width = width
         self.height = height
 
-        self.center = (width/2, height/2)
+        self.center = (width / 2, height / 2)
 
         # populate cities based on width and height
         # these cities are simply evenly spaced points in a graph
@@ -56,6 +57,7 @@ class Draw:
     """
     This class contains methods for environment visualization
     """
+
     def __init__(self, environment=None):
 
         self.env_fig = plt.figure()
@@ -111,7 +113,8 @@ class Draw:
     def draw_split(self, points):
 
         for point in points:
-            line = plt.Line2D((self.environment.center[0], point[0]), (self.environment.center[1], point[1]), lw=3, color='green')
+            line = plt.Line2D((self.environment.center[0], point[0]), (self.environment.center[1], point[1]), lw=3,
+                              color='green')
             self.draw.add_line(line)
 
     def draw_path(self, path):
@@ -146,7 +149,7 @@ class Draw:
             # logic for changing colors for gradient
             if not back:
                 count += 1
-                count %= 9     # 9 different shades of red
+                count %= 9  # 9 different shades of red
 
                 if count == 0:
                     back = True
@@ -192,6 +195,7 @@ def ant_tsp(cities):
 
     return ant_route
 
+
 def genetic_tsp(cities):
     """
     :param cities : cities to run TSP on
@@ -203,15 +207,17 @@ def genetic_tsp(cities):
         citylist.append(gene.City(x=city[0], y=city[1]))
 
     # geneticAlgorithmPlot(population=cityList, popSize=100, eliteSize=20, mutationRate=0.01, generations=500)
-    node_path = gene.geneticAlgorithm(population=citylist, popSize=100, eliteSize=20, mutationRate=0.01, generations=500)
+    node_path = gene.geneticAlgorithm(population=citylist, popSize=100, eliteSize=20, mutationRate=0.01,
+                                      generations=500)
 
     path = []
     # the path is actually made up of "Node" objects
     # so extract the information into a list
     for node in node_path:
-        path.append([node.x, node.y])
+        path.append((node.x, node.y))
 
     return path
+
 
 def python_tsp(cities):
     """
@@ -226,8 +232,8 @@ def python_tsp(cities):
 
     return python_route
 
-def quadrant(center, point):
 
+def quadrant(center, point):
     # new vector with respect to the center point
     v_wr_c = np.array(point) - np.array(center)
 
@@ -267,15 +273,49 @@ def quadrant(center, point):
     elif v_wr_c[0] > 0 and v_wr_c[1] < 0:
         return 4
 
+# https://stackoverflow.com/questions/2827393/angles-between-two-n-dimensional-vectors-in-python/13849249#13849249
+def unit_vector(vector):
+    """ Returns the unit vector of the vector.  """
+    return vector / np.linalg.norm(vector)
+
+def angle_between(v1, v2):
+    """ Returns the angle in radians between vectors 'v1' and 'v2'::
+
+            >>> angle_between((1, 0, 0), (0, 1, 0))
+            1.5707963267948966
+            >>> angle_between((1, 0, 0), (1, 0, 0))
+            0.0
+            >>> angle_between((1, 0, 0), (-1, 0, 0))
+            3.141592653589793
+    """
+    v1_u = unit_vector(v1)
+    v2_u = unit_vector(v2)
+    return np.arccos(np.clip(np.dot(v1_u, v2_u), -1.0, 1.0))
+
 
 def find_angle_from_center(center, point):
 
+    if center == point:
+        return 'center'
 
-    pass
+    # vector from center point to edge of the graph
+    center_vector = np.array([2*center[0], center[1]]) - np.array(center)
+
+    # calculate new vector with respect to the center point
+    v_wr_c = np.array(point) - np.array(center)
+
+    angle = angle_between(center_vector, v_wr_c)
+
+    position = quadrant(center, point)
+
+    if position == 3 or position == 4 or position == '270':
+        return math.radians(360) - angle
+
+    else:
+        return angle
 
 
 def get_uav_routes(environment, number_of_uavs):
-
     # these should correspond for each uav
     rotated_points = []
     angles = []
@@ -285,30 +325,24 @@ def get_uav_routes(environment, number_of_uavs):
         # create a rotation matrix to find the initial paths of all of the uavs
         # increase the angle each iteration
         angle = 360 / number_of_uavs
-        theta = np.radians(num*angle)
+        theta = np.radians(num * angle)
         angles.append(theta)
         c, s = np.cos(theta), np.sin(theta)
         R = np.array(((c, -s), (s, c)))
 
         # this will calculate the new point for each drone
-        vec = np.array([np.hypot(environment.width, environment.height), environment.height/2]) - environment.center
+        vec = np.array([np.hypot(environment.width, environment.height), environment.height / 2]) - environment.center
         rot_point = R @ vec
         rotated_point = rot_point + environment.center
 
-
         rotated_points.append(list(rotated_point))
-
 
         # calculate the angle of each point and assign them to a respective drone
         for city in environment.cities:
-
-
-
             pass
 
-
-
     return rotated_points
+
 
 # this will run a specified tsp instance on an mxn grid and plot it
 def run_tsp(tsp_algorithm, m, n, k=None, plot_title='title'):
@@ -346,7 +380,6 @@ def run_tsp(tsp_algorithm, m, n, k=None, plot_title='title'):
 
 
 if __name__ == "__main__":
-
     # defining the dimensions of the environment
     m = 4  # width
     n = 4  # height
