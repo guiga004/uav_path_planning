@@ -226,10 +226,59 @@ def python_tsp(cities):
 
     return python_route
 
+def quadrant(center, point):
+
+    # new vector with respect to the center point
+    v_wr_c = np.array(point) - np.array(center)
+
+    # center
+    if v_wr_c[0] == 0 and v_wr_c[1] == 0:
+        return 'c'
+
+    # 0 degree position:
+    elif v_wr_c[0] > 0 and v_wr_c[1] == 0:
+        return '0'
+
+    # quadrant 1
+    elif v_wr_c[0] > 0 and v_wr_c[1] > 0:
+        return 1
+
+    # 90 degree position:
+    elif v_wr_c[0] == 0 and v_wr_c[1] > 0:
+        return '90'
+
+    # quadrant 2
+    elif v_wr_c[0] < 0 and v_wr_c[1] > 0:
+        return 2
+
+    # 180 degree position:
+    elif v_wr_c[0] < 0 and v_wr_c[1] == 0:
+        return '180'
+
+    # quadrant 3
+    elif v_wr_c[0] < 0 and v_wr_c[1] < 0:
+        return 3
+
+    # 270 degree position:
+    elif v_wr_c[0] == 0 and v_wr_c[1] < 0:
+        return '270'
+
+    # quadrant 4
+    elif v_wr_c[0] > 0 and v_wr_c[1] < 0:
+        return 4
+
+
+def find_angle_from_center(center, point):
+
+
+    pass
+
+
 def get_uav_routes(environment, number_of_uavs):
 
     # these should correspond for each uav
     rotated_points = []
+    angles = []
 
     for num in range(number_of_uavs):
 
@@ -237,6 +286,7 @@ def get_uav_routes(environment, number_of_uavs):
         # increase the angle each iteration
         angle = 360 / number_of_uavs
         theta = np.radians(num*angle)
+        angles.append(theta)
         c, s = np.cos(theta), np.sin(theta)
         R = np.array(((c, -s), (s, c)))
 
@@ -245,20 +295,18 @@ def get_uav_routes(environment, number_of_uavs):
         rot_point = R @ vec
         rotated_point = rot_point + environment.center
 
-        if rotated_point[0] > environment.width:
-            rotated_point[0] = environment.width
-
-        elif rotated_point[0] < 0:
-            rotated_point[0] = 0
-
-        if rotated_point[1] > environment.height:
-            rotated_point[1] = environment.height
-
-        elif rotated_point[1] < 0:
-            rotated_point[1] = 0
-
 
         rotated_points.append(list(rotated_point))
+
+
+        # calculate the angle of each point and assign them to a respective drone
+        for city in environment.cities:
+
+
+
+            pass
+
+
 
     return rotated_points
 
@@ -334,6 +382,6 @@ if __name__ == "__main__":
 
     routes = get_uav_routes(environment=land, number_of_uavs=k)
 
-    picasso.draw_split(routes)
+    # picasso.draw_split(routes)
 
     picasso.show_fig()
