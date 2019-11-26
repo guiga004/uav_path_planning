@@ -84,7 +84,7 @@ class Environment:
 
         # 0 degree position:
         elif v_wr_c[0] > 0 and v_wr_c[1] == 0:
-            return '0'
+            return 0
 
         # quadrant 1
         elif v_wr_c[0] > 0 and v_wr_c[1] > 0:
@@ -92,7 +92,7 @@ class Environment:
 
         # 90 degree position:
         elif v_wr_c[0] == 0 and v_wr_c[1] > 0:
-            return '90'
+            return 90
 
         # quadrant 2
         elif v_wr_c[0] < 0 and v_wr_c[1] > 0:
@@ -100,7 +100,7 @@ class Environment:
 
         # 180 degree position:
         elif v_wr_c[0] < 0 and v_wr_c[1] == 0:
-            return '180'
+            return 180
 
         # quadrant 3
         elif v_wr_c[0] < 0 and v_wr_c[1] < 0:
@@ -116,27 +116,32 @@ class Environment:
 
     def find_angle_from_center(self, point):
 
-        if self.center == point:
+        print('point', point)
+
+        if tuple(point) == self.center:
             return 'center'
-
-        # vector from center point to edge of the graph
-        center_vector = np.array([2 * self.center[0], self.center[1]]) - np.array(self.center)
-
-        # calculate new vector with respect to the center point
-        v_wr_c = np.array(point) - np.array(self.center)
-
-        # calculate the angle
-        angle = Environment.angle_between(center_vector, v_wr_c)
 
         # calculate the position of the point for a few corner cases
         position = Environment.quadrant(self, point)
 
-        if position == 3 or position == 4 or position == '270':
-            return math.radians(360) - angle
+        if position == 0 or position == 90 or position == 180:
+            return np.radians(position)
 
         else:
-            return angle
+            # vector from center point to edge of the graph
+            center_vector = np.array([2 * self.center[0], self.center[1]]) - np.array(self.center)
 
+            # calculate new vector with respect to the center point
+            v_wr_c = np.array(point) - np.array(self.center)
+
+            # calculate the angle
+            angle = Environment.angle_between(center_vector, v_wr_c)
+
+            if position == 3 or position == 4 or position == '270':
+                return math.radians(360) - angle
+
+            else:
+                return angle
 
 class Draw:
     """
@@ -167,7 +172,7 @@ class Draw:
                 self.draw.add_line(line)
 
             else:
-                line = plt.Line2D((w, w), (0, height), lw=2, color='dimgrey')
+                line = plt.Line2D((w, w), (0, height), lw=1, color='dimgrey')
                 self.draw.add_line(line)
 
             for h in range(height + 1):
@@ -177,12 +182,12 @@ class Draw:
                     self.draw.add_line(line)
 
                 else:
-                    line = plt.Line2D((0, width), (h, h), lw=2, color='dimgrey')
+                    line = plt.Line2D((0, width), (h, h), lw=1, color='dimgrey')
                     self.draw.add_line(line)
 
-        # draw the center point
-        circle = plt.Circle(self.environment.center, radius=0.13, fc='gold', ec='black')
-        self.draw.add_patch(circle)
+        # draw the center marker
+        rectangle = plt.Rectangle((self.environment.center[0]-0.2, self.environment.center[1]-0.2), .4, .4, fc='r')
+        plt.gca().add_patch(rectangle)
 
     def draw_cities(self):
         """
@@ -202,13 +207,11 @@ class Draw:
                               color='green')
             self.draw.add_line(line)
 
-    def draw_path(self, path):
+    def draw_path(self, path, color):
         """
         :param path : this is list calculated by a tsp solver
         :return     : path length
         """
-        # these colors will be used to create a color gradient fo the arrows
-        red_shades = ['#FF0000', '#FF1919', '#FF3232', '#FF4C4C', '#FF6666', '#FF7F7F', '#FF9999', '#FFB2B2', '#FFCCCC']
 
         # this will be calculated iteratively
         path_length = 0
@@ -228,23 +231,8 @@ class Draw:
             path_length += math.hypot(dx, dy)
 
             # create an arrow
-            arrow = plt.arrow(x, y, dx, dy, width=0.045, facecolor=red_shades[count], edgecolor='black', zorder=10)
+            arrow = plt.arrow(x, y, dx, dy, width=0.045, facecolor=color, edgecolor='black', zorder=10)
             self.draw.add_patch(arrow)
-
-            # logic for changing colors for gradient
-            if not back:
-                count += 1
-                count %= 9  # 9 different shades of red
-
-                if count == 0:
-                    back = True
-                    count = 7
-
-            else:
-                count -= 1
-
-                if count == 0:
-                    back = False
 
         return path_length
 
@@ -329,104 +317,53 @@ def get_uav_routes(environment, number_of_uavs):
         # increase the angle each iteration
         angle = 360 / number_of_uavs
         theta = np.radians(num * angle)
+
+        # this will hold all of the angles that split up the environment
         angles.append(theta)
         c, s = np.cos(theta), np.sin(theta)
+
+        # create a rotation matrix
         R = np.array(((c, -s), (s, c)))
 
         # this will calculate the new point for each drone's boundary
-        # this is only for plotting purposes
-        vec = np.array([np.hypot(environment.width, environment.height), environment.height / 2]) - environment.center
+        # this is only for visualization purposes
+        vec = np.array([(environment.width/2)+np.hypot(environment.width/2, environment.height/2), environment.height/2]) - environment.center
         rot_point = R @ vec
         rotated_point = rot_point + environment.center
         rotated_points.append(list(rotated_point))
 
-    # append 2*pi so for the points belonging to the last drone
+    # append 2*pi to include the points belonging to the last drone
     angles.append(np.radians(360))
+    print(f'angles: {angles}')
 
     # calculate the angle of each point and assign them to a respective drone
     for city in environment.cities:
 
         city_angle = environment.find_angle_from_center(city)
+        print('city:', city_angle)
 
-        for i, angle in enumerate(angles):
+        if city_angle != 'center':
 
-            if city_angle <= angle:
+            for i, angle in enumerate(angles):
 
-                if f'{i}' not in uav_routes.keys():
-                    uav_routes.update({f'{i}': [city]})
+                if city_angle <= angle != 0:
 
-                else:
-                    uav_routes[f'{i}'].append(city)
+                    if f'{i}' not in uav_routes.keys():
+                        uav_routes.update({f'{i}': [city]})
 
-                break
+                    else:
+                        uav_routes[f'{i}'].append(city)
 
-
-        # for i in range(len(angles)):
-        #
-        #     if city_angle < angles[i]:
-        #
-        #         if f'{i}' not in uav_routes.keys():
-        #             uav_routes.update({f'{i}': [city]})
-        #
-        #         else:
-        #             uav_routes[f'{i}'].append(city)
-        #
+                    break
 
     return uav_routes, rotated_points
 
 
-# this will run a specified tsp instance on an mxn grid and plot it
-def run_tsp(tsp_algorithm, m, n, k=None, plot_title='title'):
-    """
-    :param tsp_algorithm : tsp function to be used
-    :param m             : width of grid
-    :param n             : height of grid
-    :param k             : number of UAVs
-    :param plot_title    : title of the path plot
-    :return              : N/A
-    """
-    # TODO: implement k
-
-    land = Environment(width=m, height=n)
-    cities = land.get_cities()
-
-    picasso = Draw(environment=land)
-    picasso.draw_environment(title=plot_title)
-    picasso.draw_cities()
-
-    start = time.time()
-    path = tsp_algorithm(cities)
-    end = time.time()
-
-    print(f'run-time    : {round(end - start, 5)} seconds')
-    path.append(path[0])
-    path_length = picasso.draw_path(path)
-    print(f'path length : {round(path_length, 5)} units')
-
-    routes = get_uav_routes(environment=land, number_of_uavs=k)
-
-    picasso.draw_split(routes)
-
-    picasso.show_fig()
-
-
 if __name__ == "__main__":
     # defining the dimensions of the environment
-    m = 4  # width
-    n = 4  # height
-    k = 5  # number of uavs
-
-    # print('\n##### ROUTE PLANNING WITH ANT COLONY ALGORITHM #####\n')
-    #
-    # run_tsp(ant_tsp, land_width, land_height, plot_title='Ant Algorithm Path')
-    #
-    # print('\n##### ROUTE PLANNING WITH GENETIC ALGORITHM #####\n')
-    #
-    # run_tsp(genetic_tsp, land_width, land_height, plot_title='Genetic Algorithm Path')
-    #
-    # print('\n##### ROUTE PLANNING WITH PYTHON TSP PACKAGE #####\n')
-    #
-    # run_tsp(python_tsp, land_width, land_height, k=number_of_uavs, plot_title='Python TSP Algorithm Path')
+    m = 5  # width
+    n = 5  # height
+    k = 1  # number of uavs
 
     land = Environment(width=m, height=n)
     cities = land.get_cities()
@@ -435,16 +372,25 @@ if __name__ == "__main__":
     picasso.draw_environment(title='Python TSP Algorithm Path')
     picasso.draw_cities()
 
-    start = time.time()
-    path = python_tsp(cities)
-    end = time.time()
+    # this will split up the uav routes
+    uav_routes, split = get_uav_routes(environment=land, number_of_uavs=k)
 
-    # print(f'run-time    : {round(end - start, 5)} seconds')
-    # path.append(path[0])
-    # path_length = picasso.draw_path(path)
-    # print(f'path length : {round(path_length, 5)} units')
+    for key in uav_routes:
 
-    routes, split = get_uav_routes(environment=land, number_of_uavs=k)
+        path = uav_routes[key]
+
+        # make the center point the starting point
+        path.insert(0, land.center)
+
+        print(path)
+
+        # run tsp on each sub path
+        path = python_tsp(path)
+
+        # have the uav travel back to the center path
+        path.append(path[0])
+        print(path)
+        path_length = picasso.draw_path(path, np.random.rand(3,))
 
     picasso.draw_split(split)
 
