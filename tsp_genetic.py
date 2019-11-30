@@ -1,6 +1,5 @@
 import numpy as np, random, operator, pandas as pd, matplotlib.pyplot as plt
 
-
 class City:
     def __init__(self, x, y):
         self.x = x

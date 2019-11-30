@@ -1,11 +1,10 @@
 import math
 import random
 
-#DONE
+
 def euc_2d(c1, c2):
     return round(math.sqrt((c1[0] - c2[0])**2.0 + (c1[1] - c2[1])**2.0))
 
-#DONE
 def cost(permutation, cities):
     distance = 0
     for i in range(len(permutation)):
@@ -13,7 +12,6 @@ def cost(permutation, cities):
         distance += euc_2d(cities[permutation[i]], cities[c2])
     return distance
 
-#DONE
 def random_permutation(cities):
     perm = list(range(len(cities)))
     for i in range(len(perm)):
@@ -21,11 +19,9 @@ def random_permutation(cities):
         perm[r], perm[i] = perm[i], perm[r]
     return perm
 
-#DONE
 def initialise_pheromone_matrix(num_cities, init_pher):
     return [[init_pher]*num_cities]*num_cities
 
-#DONE
 def calculate_choices(cities, last_city, exclude, pheromone, c_heur, c_hist):
     choices = []
     for i in range(len(cities)):
@@ -38,7 +34,6 @@ def calculate_choices(cities, last_city, exclude, pheromone, c_heur, c_hist):
             choices.append(prob)
     return choices
 
-#DONE
 def prob_select(choices):
     total = sum(element['prob'] for element in choices)
     if total == 0.0:
@@ -50,14 +45,10 @@ def prob_select(choices):
             return choices[i]['city']
     return choices[-1]['city']
 
-
-
-#DONE
 def greedy_select(choices):
     return max(choices, key=lambda x:x['prob'])['city']
 	
 
-#DONE
 def stepwise_const(cities, phero, c_heur, c_greed):
     perm = []
     perm.append(random.randint(0, len(cities)-1))
@@ -68,7 +59,6 @@ def stepwise_const(cities, phero, c_heur, c_greed):
         perm.append(next_city)
     return perm
 
-#DONE
 def global_update_pheromone(phero, cand, decay):
     for i in range(len(cand['vector'])):
         y = cand['vector'][0] if (i == (len(cand['vector'])-1)) else cand['vector'][i+1]
@@ -77,7 +67,6 @@ def global_update_pheromone(phero, cand, decay):
         phero[y][cand['vector'][i]] = value
     return None
 
-#DONE
 def local_update_pheromone(pheromone, cand, c_local_phero, init_phero):
     for i in range(len(cand['vector'])):
         y = cand['vector'][0] if (i == (len(cand['vector'])-1)) else cand['vector'][i+1]
@@ -86,7 +75,6 @@ def local_update_pheromone(pheromone, cand, c_local_phero, init_phero):
         pheromone[y][cand['vector'][i]] = value
     return None
 
-#DONE
 def search(cities, max_it, num_ants, decay, c_heur, c_local_phero, c_greed):
     best = {'vector':random_permutation(cities)}
     best['cost'] = cost(best['vector'], cities)
