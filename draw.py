@@ -63,6 +63,7 @@ class Draw:
         :return         : N/A
         """
         for point in points:
+
             line = plt.Line2D((self.environment.center[0], point[0]), (self.environment.center[1], point[1]), lw=3,
                               color='green')
             self.draw.add_line(line)

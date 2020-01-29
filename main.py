@@ -74,8 +74,8 @@ def get_uav_routes(environment, number_of_uavs):
 if __name__ == "__main__":
 
     m = 4  # width
-    n = 4  # heights
-    k = 6  # number of uavs
+    n = 5  # height
+    k = 5  # number of uavs
 
     land = Environment(width=m, height=n)
     cities = land.get_cities
@@ -87,7 +87,9 @@ if __name__ == "__main__":
     # this will split up the uav routes
     uav_routes, split = get_uav_routes(environment=land, number_of_uavs=k)
 
-    for key in uav_routes:
+    colors = ['blue', 'green', 'maroon', 'yellow', 'gray']
+
+    for i, key in enumerate(uav_routes):
 
         path = uav_routes[key]
 
@@ -100,7 +102,7 @@ if __name__ == "__main__":
         # have each uav travel back to the center point
         path.append(path[0])
 
-        picasso.draw_path(path=path, color='blue')
+        picasso.draw_path(path=path, color=colors[i])
 
     # this will visualize how the environment was split
     picasso.draw_split(split)
