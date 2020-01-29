@@ -41,6 +41,7 @@ class Draw:
 
                 else:
                     line = plt.Line2D((0, width), (h, h), lw=1, color='dimgrey')
+
                     self.draw.add_line(line)
 
         # draw the center marker

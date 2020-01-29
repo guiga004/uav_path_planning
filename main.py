@@ -4,6 +4,7 @@ email  : guiga004@umn.edu
 """
 
 import numpy as np
+import time
 from environment import Environment
 from draw import Draw
 from tsp_algorithms import ant_tsp, genetic_tsp, exact_tsp
@@ -21,6 +22,7 @@ def get_uav_routes(environment, number_of_uavs):
 
     # this will hold the points that each uav will visit
     uav_routes = {}
+
 
     for num in range(number_of_uavs):
 
@@ -57,9 +59,9 @@ def get_uav_routes(environment, number_of_uavs):
             for i, angle in enumerate(angles):
 
                 # assign points by iterating counter-clockwise through environment
-                if city_angle <= angle != 0:
+                if city_angle < angle != 0:
 
-                    # create a key in the dictionary if not yet created
+                    # create a key in the dictionary if not yet created+
                     if f'{i}' not in uav_routes.keys():
                         uav_routes.update({f'{i}': [city]})
 
@@ -73,9 +75,9 @@ def get_uav_routes(environment, number_of_uavs):
 
 if __name__ == "__main__":
 
-    m = 4  # width
-    n = 5  # height
-    k = 5  # number of uavs
+    m = 2  # width
+    n = 3  # height
+    k = 2  # number of uavs
 
     land = Environment(width=m, height=n)
     cities = land.get_cities
@@ -84,27 +86,34 @@ if __name__ == "__main__":
     picasso.draw_environment(title='Path Planning with Multiple Drones')
     picasso.draw_cities()
 
-    # this will split up the uav routes
-    uav_routes, split = get_uav_routes(environment=land, number_of_uavs=k)
+    # only run the following code if number of UAVs is greater than 0
+    if k > 0:
 
-    colors = ['blue', 'green', 'maroon', 'yellow', 'gray']
+        start_time = time.time()
 
-    for i, key in enumerate(uav_routes):
+        # this will split up the uav routes
+        uav_routes, split = get_uav_routes(environment=land, number_of_uavs=k)
 
-        path = uav_routes[key]
+        colors = ['blue', 'maroon', 'yellow', 'gray', 'green']
 
-        # make the center point the starting point
-        path.insert(0, land.center)
+        for i, key in enumerate(uav_routes):
 
-        # run tsp on each sub path
-        path = exact_tsp(path)
+            path = uav_routes[key]
 
-        # have each uav travel back to the center point
-        path.append(path[0])
+            # make the center point the starting point
+            path.insert(0, land.center)
 
-        picasso.draw_path(path=path, color=colors[i])
+            # run tsp on each sub path
+            path = exact_tsp(path)
 
-    # this will visualize how the environment was split
-    picasso.draw_split(split)
+            # have each uav travel back to the center point
+            path.append(path[0])
+
+            picasso.draw_path(path=path, color=colors[i])
+
+        print("--- %s seconds ---" % (time.time() - start_time))
+
+        # this will visualize how the environment was split
+        picasso.draw_split(split)
 
     picasso.show_fig()
