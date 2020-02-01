@@ -49,29 +49,30 @@ def get_uav_routes(environment, number_of_uavs):
     # append 2*pi to include the points belonging to the last drone
     angles.append(np.radians(360))
 
+    # this will allow a more fair split
     optimal_split = round(len(environment.cities) / (len(angles)-1))
-
-    print(f'angles: {angles}')
-    print(f'cities: {environment.cities}')
-    print(f'optimal_split: {optimal_split}')
 
     # sort the cities by their angle
     for city in environment.cities:
-        city.append(environment.find_angle_from_center(city))
+        angle = environment.find_angle_from_center(city)
 
-    print(f'cities: {environment.cities}')
+        if angle != 'center':
+            city.append(angle)
+
+        else:
+            city.append(999)
+
+    print(environment.cities)
 
     environment.cities = sorted(environment.cities, key=lambda e: e[2], reverse=False)
 
-    print(f'cities: {environment.cities}')
-
-    # calculate the angle of each point and assign them to a respective drone
     for city in environment.cities:
 
+        # the city angle is now stored with each city, so grab it
         city_angle = city[2]
 
         # don't care about the center since we are starting at the center
-        if city_angle != 'center':
+        if city_angle != 999:
 
             for i, angle in enumerate(angles):
 
@@ -94,18 +95,15 @@ def get_uav_routes(environment, number_of_uavs):
                             else:
                                 uav_routes[f'{i+1}'].append(city[:2])
 
-
                     break
-
 
     return uav_routes, rotated_points
 
 
 if __name__ == "__main__":
-
-    m = 2  # width
-    n = 3  # height
-    k = 3  # number of uavs
+    m = 4  # width
+    n = 5 # height
+    k = 6  # number of uavs
 
     land = Environment(width=m, height=n)
     cities = land.get_cities
@@ -123,7 +121,7 @@ if __name__ == "__main__":
         # this will split up the uav routes
         uav_routes, split = get_uav_routes(environment=land, number_of_uavs=k)
 
-        colors = ['blue', 'maroon', 'yellow', 'gray', 'green']
+        colors = ['blue', 'maroon', 'yellow', 'gray', 'green', 'pink']
 
         for i, key in enumerate(uav_routes):
 
@@ -138,7 +136,7 @@ if __name__ == "__main__":
             # have each uav travel back to the center point
             path.append(path[0])
 
-            total_path_length += picasso.draw_path(path=path, color=colors[i])
+            total_path_length += picasso.draw_path(path=path, color=colors[i%len(colors)])
 
         print("--- %s seconds ---" % (time.time() - start_time))
         print("Total Length", total_path_length)
