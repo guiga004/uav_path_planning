@@ -24,7 +24,6 @@ def get_uav_routes(environment, number_of_uavs):
     # this will hold the points that each uav will visit
     uav_routes = {}
 
-
     for num in range(number_of_uavs):
 
         # create a rotation matrix to find the initial paths of all of the uavs
