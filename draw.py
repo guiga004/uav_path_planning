@@ -20,10 +20,12 @@ class Draw:
         :return             : N/A
         """
         self.title = title
+
         width = self.environment.width
         height = self.environment.height
 
         for w in range(width + 1):
+
 
             if w == 0 or w == width:
                 line = plt.Line2D((w, w), (0, height), lw=3, color='black')
@@ -46,7 +48,7 @@ class Draw:
 
         # draw the center marker
         rectangle = plt.Rectangle((self.environment.center[0]-0.2, self.environment.center[1]-0.2), .4, .4, fc='r')
-        plt.gca().add_patch(rectangle)
+        self.draw.add_patch(rectangle)
 
     def draw_cities(self):
         """
@@ -93,7 +95,7 @@ class Draw:
             path_length += math.hypot(dx, dy)
 
             # create an arrow
-            arrow = plt.arrow(x, y, dx, dy, width=0.045, facecolor=color, edgecolor='black', zorder=10)
+            arrow = plt.arrow(x, y, dx, dy, width=0.09, facecolor=color, edgecolor='black', zorder=10)
             self.draw.add_patch(arrow)
 
         return path_length
@@ -110,3 +112,6 @@ class Draw:
 
         # close the figure so other figures can be created
         plt.close(self.env_fig)
+
+
+

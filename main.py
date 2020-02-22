@@ -87,38 +87,12 @@ def get_uav_routes(environment, number_of_uavs):
 
                     break
 
-        # # don't care about the center since we are starting at the center
-        # if city_angle != 999:
-        #
-        #     for i, angle in enumerate(angles):
-        #
-        #         # assign points by iterating counter-clockwise through environment
-        #         if city_angle < angle != 0:
-        #
-        #             # create a key in the dictionary if not yet created+
-        #             if f'{i}' not in uav_routes.keys():
-        #                 uav_routes.update({f'{i}': [city[:2]]})
-        #
-        #             else:
-        #
-        #                 if len(uav_routes[f'{i}']) < optimal_split or angle == angles[-1]:
-        #                     uav_routes[f'{i}'].append(city[:2])
-        #
-        #                 else:
-        #
-        #                     if f'{i+1}' not in uav_routes.keys():
-        #                         uav_routes.update({f'{i+1}': [city[:2]]})
-        #                     else:
-        #                         uav_routes[f'{i+1}'].append(city[:2])
-        #
-        #             break
-
     return uav_routes, rotated_points
 
 
 if __name__ == "__main__":
     m = 4  # width
-    n = 5 # height
+    n = 5  # height
     k = 6  # number of uavs
 
     land = Environment(width=m, height=n)
