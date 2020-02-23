@@ -91,9 +91,9 @@ def get_uav_routes(environment, number_of_uavs):
 
 
 if __name__ == "__main__":
-    m = 4  # width
-    n = 5  # height
-    k = 6  # number of uavs
+    m = 3  # width
+    n = 3  # height
+    k = 3  # number of uavs
 
     land = Environment(width=m, height=n)
     cities = land.get_cities

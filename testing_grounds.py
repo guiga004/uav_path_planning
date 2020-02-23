@@ -39,18 +39,18 @@ def partitioning(a1, a2, x, y):
     for k1 in range(1, math.ceil(x/a1)):
         for k2 in range(1, math.ceil(y/a2)):
             i = i+1
-            P.append([[(k1-1)*a1, k1*a1], [(k2-1)*a2, k2*a2], 9])
+            P.append([[(k1-1)*a1, k1*a1], [(k2-1)*a2, k2*a2], 9, 0.8])
 
     for k in range(1, math.ceil(y/a2)):
         i = i+1
-        P.append([[x-a1, x], [(k-1)*a2, k*a2], 6])
+        P.append([[x-a1, x], [(k-1)*a2, k*a2], 6, 1])
 
     for k in range(1, math.ceil(x/a1)):
         i = i+1
-        P.append([[(k-1)*a1, k*a1], [y-a2, y], 3])
+        P.append([[(k-1)*a1, k*a1], [y-a2, y], 3, 0.8])
 
     i = i+1
-    P.append([[x-a1, x], [y-a2, y], 0])
+    P.append([[x-a1, x], [y-a2, y], 0, 1])
 
     return P
 
@@ -76,6 +76,7 @@ def draw_everything(a1, a2, x, y, hardware_specs=None):
 
         edge_color = 'black'
         order = partition[2]
+        opacity = partition[3]
         line_width = 3
 
         rectangle = plt.Rectangle\
@@ -87,7 +88,8 @@ def draw_everything(a1, a2, x, y, hardware_specs=None):
                 color=colors.pop(),
                 ec=edge_color,
                 lw=line_width,
-                zorder=order
+                zorder=order,
+                alpha=opacity,
             )
         picasso.draw.add_patch(rectangle)
 
@@ -96,8 +98,8 @@ def draw_everything(a1, a2, x, y, hardware_specs=None):
 
 if __name__ == "__main__":
 
-    big_x = 11
-    big_y = 9
+    big_x = 10
+    big_y = 10
     # small_x = 3
     # small_y = 3
 
