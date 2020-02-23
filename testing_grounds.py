@@ -55,7 +55,7 @@ def partitioning(a1, a2, x, y):
     return P
 
 
-def draw_everything(a1, a2, x, y, specs=None, draw=True):
+def uav_ugv_trajectory_generation(a1, a2, x, y, specs=None, draw=True):
 
     picasso = None
     partitions = partitioning(a1, a2, x, y)
@@ -138,7 +138,7 @@ if __name__ == "__main__":
         small_x = partition_size[0]
         small_y = partition_size[1]
 
-        test, ugv_points = draw_everything(small_x, small_y, big_x, big_y, specs=hardware_specs,draw=False)
+        test, ugv_points = uav_ugv_trajectory_generation(small_x, small_y, big_x, big_y, specs=hardware_specs,draw=False)
 
         # run tsp for the ugv route
         ugv_path = exact_tsp(ugv_points)
