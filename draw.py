@@ -71,7 +71,7 @@ class Draw:
                               color='green')
             self.draw.add_line(line)
 
-    def draw_path(self, path, color):
+    def draw_path(self, path, color, draw=True):
         """
         :param path : this is list calculated by a tsp solver
         :return     : path length
@@ -94,9 +94,10 @@ class Draw:
             # iteratively calculate path length
             path_length += math.hypot(dx, dy)
 
-            # create an arrow
-            arrow = plt.arrow(x, y, dx, dy, width=0.09, facecolor=color, edgecolor='black', zorder=10)
-            self.draw.add_patch(arrow)
+            if draw:
+                # create an arrow
+                arrow = plt.arrow(x, y, dx, dy, width=0.09, facecolor=color, edgecolor='black', zorder=10)
+                self.draw.add_patch(arrow)
 
         return path_length
 

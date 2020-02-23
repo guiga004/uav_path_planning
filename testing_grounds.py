@@ -55,16 +55,19 @@ def partitioning(a1, a2, x, y):
     return P
 
 
-def draw_everything(a1, a2, x, y, hardware_specs=None):
+def draw_everything(a1, a2, x, y, specs=None, draw=True):
 
-    picasso = Draw()
+    picasso = None
+    partitions = partitioning(a1, a2, x, y)
     partition_midpoints = []
 
-    partitions = partitioning(a1, a2, x, y)
+    if draw:
+        picasso = Draw()
 
-    colors = []
-    for i in range(len(partitions)):
-        colors.append(generate_new_color(colors, pastel_factor=0.9))
+
+        colors = []
+        for i in range(len(partitions)):
+            colors.append(generate_new_color(colors, pastel_factor=0.9))
 
     for partition in partitions:
 
@@ -73,43 +76,59 @@ def draw_everything(a1, a2, x, y, hardware_specs=None):
         height_y = partition[1][1] - partition[1][0]
         partition_midpoints.append((bottom_corner[0] + width_x/2, bottom_corner[1] + height_y/2))
 
-
         edge_color = 'black'
         order = partition[2]
         opacity = partition[3]
         line_width = 3
 
-        rectangle = plt.Rectangle\
-            (
-                xy=bottom_corner,
-                width=width_x,
-                height=height_y,
-                fill=True,
-                color=colors.pop(),
-                ec=edge_color,
-                lw=line_width,
-                zorder=order,
-                alpha=opacity,
-            )
-        picasso.draw.add_patch(rectangle)
+        if draw:
+            rectangle = plt.Rectangle\
+                (
+                    xy=bottom_corner,
+                    width=width_x,
+                    height=height_y,
+                    fill=True,
+                    color=colors.pop(),
+                    ec=edge_color,
+                    lw=line_width,
+                    zorder=order,
+                    alpha=opacity,
+                )
+            picasso.draw.add_patch(rectangle)
+
 
     return picasso, partition_midpoints
 
 
 if __name__ == "__main__":
 
-    big_x = 10
-    big_y = 10
-    # small_x = 3
-    # small_y = 3
+    '''
+    The environment is assumed to have dimensions xmax = 1584 and ymax = 1056, which
+    imply ¯x = 48 and ¯y = 32, as depicted in Fig. 4. We assume
+    the UGV transport rate uG max = 5, and the charging and depletion rates 
+    for the UAVs are β+ = β− = 0.5.
+    '''
+
+    # this dictionary of specifications will be used to find the optimal partition
+    hardware_specs = \
+        {
+            'x': 5,
+            'y': 5,
+            'uG_max': 5,
+            'B+': 0.5,
+            'B-': 0.5,
+        }
+
+    big_x = hardware_specs['x']
+    big_y = hardware_specs['y']
 
     # print out all possible combinations of partition sizes
 
     partition_sizes = []
 
-    for y in range(3, 4):
+    for y in range(1, big_y+1):
 
-        for x in range(3, 4):
+        for x in range(1, big_x+1):
             partition_sizes.append([x, y])
 
     for partition_size in partition_sizes:
@@ -117,9 +136,9 @@ if __name__ == "__main__":
         # print(partition_size)
 
         small_x = partition_size[0]
-        small_y = partition_size[0]
+        small_y = partition_size[1]
 
-        test, ugv_points = draw_everything(small_x, small_y, big_x, big_y)
+        test, ugv_points = draw_everything(small_x, small_y, big_x, big_y, specs=hardware_specs,draw=False)
 
         # run tsp for the ugv route
         ugv_path = exact_tsp(ugv_points)
@@ -128,9 +147,8 @@ if __name__ == "__main__":
 
         ugv_path.append(ugv_path[0])
 
-        total_path_length = test.draw_path(path=ugv_path, color='white')
+        total_path_length = Draw.draw_path(None, path=ugv_path, color='white', draw=False)
 
-        test.show_fig()
-
+        print(f'size: {small_x, small_y} ; path length: {total_path_length}')
 
 
