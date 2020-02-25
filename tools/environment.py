@@ -1,3 +1,7 @@
+"""
+author : Mohammed Guiga
+email  : guiga004@umn.edu
+"""
 import math
 import numpy as np
 
