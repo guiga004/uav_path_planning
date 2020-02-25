@@ -157,4 +157,3 @@ arXiv preprint arXiv:1908.05727,2019.
 #
 #
 #     return picasso, partition_midpoints
-
