@@ -1,7 +1,7 @@
 import random
-import math
 from draw import Draw
 from tsp_algorithms import exact_tsp
+import paper_algorithms as pa
 import matplotlib.pyplot as plt
 
 
@@ -24,41 +24,11 @@ def generate_new_color(existing_colors, pastel_factor=0.5):
             best_color = color
     return best_color
 
-def partitioning(a1, a2, x, y):
-    '''
-    :param a1: width of sub partition
-    :param a2: height of sub partition
-    :param x: width of environment
-    :param y: height of environment
-    :return:
-    '''
-
-    P = []
-    i = 0
-
-    for k1 in range(1, math.ceil(x/a1)):
-        for k2 in range(1, math.ceil(y/a2)):
-            i = i+1
-            P.append([[(k1-1)*a1, k1*a1], [(k2-1)*a2, k2*a2], 9, 0.8])
-
-    for k in range(1, math.ceil(y/a2)):
-        i = i+1
-        P.append([[x-a1, x], [(k-1)*a2, k*a2], 6, 1])
-
-    for k in range(1, math.ceil(x/a1)):
-        i = i+1
-        P.append([[(k-1)*a1, k*a1], [y-a2, y], 3, 0.8])
-
-    i = i+1
-    P.append([[x-a1, x], [y-a2, y], 0, 1])
-
-    return P
-
 
 def uav_ugv_trajectory_generation(a1, a2, x, y, specs=None, draw=True):
 
     picasso = None
-    partitions = partitioning(a1, a2, x, y)
+    partitions = pa.partitioning(a1, a2, x, y)
     partition_midpoints = []
 
     if draw:
@@ -112,23 +82,26 @@ if __name__ == "__main__":
     # this dictionary of specifications will be used to find the optimal partition
     hardware_specs = \
         {
-            'x': 5,
-            'y': 5,
-            'uG_max': 5,
-            'B+': 0.5,
-            'B-': 0.5,
+            'x_max': 165,   # this will be normalized by the square detection footprint (d)
+            'y_max': 165,   # the y dimensioned length of the environment
+            'uG_max': 5,    # the max speed of a UGV
+            'uA_max': 5,    # the max speed of a UAV
+            'd': 33,        # square detection footprint a dxd square that the UAV can detect
+            'e': 100,       # maximum energy of UAV
+            'B+': 0.5,      # energy increase rate when charging
+            'B-': 0.5,      # energy decrease rate when flying
         }
 
-    big_x = hardware_specs['x']
-    big_y = hardware_specs['y']
+    x_bar = hardware_specs['x_max'] // hardware_specs['d']
+    y_bar = hardware_specs['y_max'] // hardware_specs['d']
 
     # print out all possible combinations of partition sizes
 
     partition_sizes = []
 
-    for y in range(1, big_y+1):
+    for y in range(1, y_bar+1):
 
-        for x in range(1, big_x+1):
+        for x in range(1, x_bar+1):
             partition_sizes.append([x, y])
 
     for partition_size in partition_sizes:
@@ -138,7 +111,7 @@ if __name__ == "__main__":
         small_x = partition_size[0]
         small_y = partition_size[1]
 
-        test, ugv_points = uav_ugv_trajectory_generation(small_x, small_y, big_x, big_y, specs=hardware_specs,draw=False)
+        test, ugv_points = uav_ugv_trajectory_generation(small_x, small_y, x_bar, y_bar, specs=hardware_specs, draw=False)
 
         # run tsp for the ugv route
         ugv_path = exact_tsp(ugv_points)
@@ -150,5 +123,3 @@ if __name__ == "__main__":
         total_path_length = Draw.draw_path(None, path=ugv_path, color='white', draw=False)
 
         print(f'size: {small_x, small_y} ; path length: {total_path_length}')
-
-
