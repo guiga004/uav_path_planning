@@ -9,8 +9,8 @@ import guiga_algorithms as gumo
 
 if __name__ == "__main__":
 
-    m = 3  # width
-    n = 3  # height
+    m = 10  # width
+    n = 10  # height
     k = 3  # number of uavs
 
     land = Environment(width=m, height=n)

@@ -43,7 +43,7 @@ if __name__ == "__main__":
             'n': 3           # number of UAVs
         }
 
-    pic = pa.uav_ugv_trajectory_generation(x_bar=48, y_bar=32, specs=hardware_specs, draw_ugv=False)
+    pic = pa.uav_ugv_trajectory_generation(x_bar=10, y_bar=10, specs=hardware_specs)
 
     pic.show_fig()
 
