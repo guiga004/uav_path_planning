@@ -18,7 +18,7 @@ class Environment:
         self.width = width
         self.height = height
 
-        self.center = (width / 2, height / 2)
+        self.center = [width / 2, height / 2]
 
         # populate cities based on width and height
         # these cities are simply evenly spaced points in a graph

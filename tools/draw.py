@@ -1,4 +1,3 @@
-import math
 import matplotlib.pyplot as plt
 
 class Draw:
@@ -71,35 +70,23 @@ class Draw:
                               color='green')
             self.draw.add_line(line)
 
-    def draw_path(self, path, color, draw=True):
+    def draw_path(self, path, color):
         """
-        :param path : this is list calculated by a tsp solver
-        :return     : path length
+        :param path     : this is list calculated by a tsp solver
+        :param color    : color of the arrow being drawn
+        :return         : N/A
         """
-
-        # this will be calculated iteratively
-        path_length = 0
-
-        # these will control the logic of the color gradient of the arrows
-        # currently there are 10 shades of red
-        count = 0
-        back = False
 
         for v in range(len(path) - 1):
+
             x = path[v][0]
             y = path[v][1]
             dx = path[v + 1][0] - x
             dy = path[v + 1][1] - y
 
-            # iteratively calculate path length
-            path_length += math.hypot(dx, dy)
-
-            if draw:
-                # create an arrow
-                arrow = plt.arrow(x, y, dx, dy, width=0.09, facecolor=color, edgecolor='black', zorder=10)
-                self.draw.add_patch(arrow)
-
-        return path_length
+            # create an arrow
+            arrow = plt.arrow(x, y, dx, dy, width=0.09, facecolor=color, edgecolor='black', zorder=10)
+            self.draw.add_patch(arrow)
 
     def show_fig(self):
         """
