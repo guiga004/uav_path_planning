@@ -2,7 +2,6 @@
 author : Mohammed Guiga
 email  : guiga004@umn.edu
 """
-import math
 import numpy as np
 from tsp_algorithms import exact_tsp
 
@@ -57,7 +56,7 @@ def get_uav_routes(environment, number_of_uavs):
         city_angle = city[2]
 
         # don't care about the center since we are starting at the center
-        if city_angle != 'center':
+        if city_angle != 999:
 
             for i, angle in enumerate(angles):
 
@@ -82,7 +81,6 @@ def get_uav_routes(environment, number_of_uavs):
 
                     break
 
-    # insert the center of the environment into the beginning and end of the routes list
     for key in uav_routes:
         uav_routes[key].insert(0, environment.center)     # make the center point the starting point
         uav_routes[key] = exact_tsp(uav_routes[key])      # run tsp on each route

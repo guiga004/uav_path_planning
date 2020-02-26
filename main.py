@@ -5,12 +5,11 @@ email  : guiga004@umn.edu
 import time
 from environment import Environment
 from draw import Draw
-from tsp_algorithms import exact_tsp
 import guiga_algorithms as gumo
 
 if __name__ == "__main__":
 
-    m = 2  # width
+    m = 3  # width
     n = 3  # height
     k = 3  # number of uavs
 

@@ -70,7 +70,7 @@ class Draw:
                               color='green')
             self.draw.add_line(line)
 
-    def draw_path(self, path, color):
+    def draw_path(self, path, color, draw=False):
         """
         :param path     : this is list calculated by a tsp solver
         :param color    : color of the arrow being drawn
@@ -86,7 +86,9 @@ class Draw:
 
             # create an arrow
             arrow = plt.arrow(x, y, dx, dy, width=0.09, facecolor=color, edgecolor='black', zorder=10)
-            self.draw.add_patch(arrow)
+
+            if draw:
+                self.draw.add_patch(arrow)
 
     def show_fig(self):
         """

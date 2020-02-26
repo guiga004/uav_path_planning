@@ -105,7 +105,7 @@ class Environment:
 
         # 270 degree position:
         elif v_wr_c[0] == 0 and v_wr_c[1] < 0:
-            return '270'
+            return 270
 
         # quadrant 4
         elif v_wr_c[0] > 0 and v_wr_c[1] < 0:
@@ -118,13 +118,13 @@ class Environment:
         """
 
         # edge case for the center
-        if tuple(point) == self.center:
-            return 'center'
+        if point == self.center:
+            return 999
 
         # calculate the position of the point for a few corner cases
         position = Environment.quadrant(self, point)
 
-        if position == 0 or position == 90 or position == 180:
+        if position == 0 or position == 90 or position == 180 or position == 270:
             return np.radians(position)
 
         else:

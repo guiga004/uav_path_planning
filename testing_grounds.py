@@ -3,7 +3,7 @@ from draw import Draw
 from tsp_algorithms import exact_tsp
 import paper_algorithms as pa
 import matplotlib.pyplot as plt
-
+from environment import Environment
 
 def get_random_color(pastel_factor=0.5):
     return [(x + pastel_factor) / (1.0 + pastel_factor) for x in [random.uniform(0, 1.0) for i in [1, 2, 3]]]
@@ -33,7 +33,6 @@ def uav_ugv_trajectory_generation(a1, a2, x, y, specs=None, draw=True):
 
     if draw:
         picasso = Draw()
-
 
         colors = []
         for i in range(len(partitions)):
@@ -79,6 +78,10 @@ if __name__ == "__main__":
     for the UAVs are β+ = β− = 0.5.
     '''
 
+    m = 2  # width
+    n = 3  # height
+    k = 3  # number of uavs
+
     # this dictionary of specifications will be used to find the optimal partition
     hardware_specs = \
         {
@@ -111,15 +114,8 @@ if __name__ == "__main__":
         small_x = partition_size[0]
         small_y = partition_size[1]
 
-        test, ugv_points = uav_ugv_trajectory_generation(small_x, small_y, x_bar, y_bar, specs=hardware_specs, draw=False)
+        test, ugv_points = uav_ugv_trajectory_generation(small_x, small_y, x_bar, y_bar, specs=hardware_specs)
 
-        # run tsp for the ugv route
-        ugv_path = exact_tsp(ugv_points)
 
-        # have the ugv
-
-        ugv_path.append(ugv_path[0])
-
-        total_path_length = Draw.draw_path(None, path=ugv_path, color='white', draw=False)
-
-        print(f'size: {small_x, small_y} ; path length: {total_path_length}')
+    # picasso, mid = uav_ugv_trajectory_generation(3, 3, 10, 11)
+    # picasso.show_fig()
