@@ -1,6 +1,5 @@
 import random
 from draw import Draw
-from tsp_algorithms import exact_tsp
 import paper_algorithms as pa
 import matplotlib.pyplot as plt
 from environment import Environment
@@ -25,52 +24,7 @@ def generate_new_color(existing_colors, pastel_factor=0.5):
     return best_color
 
 
-def uav_ugv_trajectory_generation(a1, a2, x, y, specs=None, draw=True):
-
-    picasso = None
-    partitions = pa.partitioning(a1, a2, x, y)
-    partition_midpoints = []
-
-    if draw:
-        picasso = Draw()
-
-        colors = []
-        for i in range(len(partitions)):
-            colors.append(generate_new_color(colors, pastel_factor=0.9))
-
-    for partition in partitions:
-
-        bottom_corner = (partition[0][0], partition[1][0])
-        width_x = partition[0][1] - partition[0][0]
-        height_y = partition[1][1] - partition[1][0]
-        partition_midpoints.append((bottom_corner[0] + width_x/2, bottom_corner[1] + height_y/2))
-
-        edge_color = 'black'
-        order = partition[2]
-        opacity = partition[3]
-        line_width = 3
-
-        if draw:
-            rectangle = plt.Rectangle\
-                (
-                    xy=bottom_corner,
-                    width=width_x,
-                    height=height_y,
-                    fill=True,
-                    color=colors.pop(),
-                    ec=edge_color,
-                    lw=line_width,
-                    zorder=order,
-                    alpha=opacity,
-                )
-            picasso.draw.add_patch(rectangle)
-
-
-    return picasso, partition_midpoints
-
-
 if __name__ == "__main__":
-
     '''
     The environment is assumed to have dimensions xmax = 1584 and ymax = 1056, which
     imply ¯x = 48 and ¯y = 32, as depicted in Fig. 4. We assume
@@ -78,44 +32,19 @@ if __name__ == "__main__":
     for the UAVs are β+ = β− = 0.5.
     '''
 
-    m = 2  # width
-    n = 3  # height
-    k = 3  # number of uavs
-
-    # this dictionary of specifications will be used to find the optimal partition
     hardware_specs = \
         {
-            'x_max': 165,   # this will be normalized by the square detection footprint (d)
-            'y_max': 165,   # the y dimensioned length of the environment
-            'uG_max': 5,    # the max speed of a UGV
-            'uA_max': 5,    # the max speed of a UAV
-            'd': 33,        # square detection footprint a dxd square that the UAV can detect
-            'e': 100,       # maximum energy of UAV
-            'B+': 0.5,      # energy increase rate when charging
-            'B-': 0.5,      # energy decrease rate when flying
+            'uG_max': 5,   # the max speed of a UGV
+            'uA_max': 1,     # the max speed of a UAV
+            'd': 2,          # square detection footprint a dxd square that the UAV can detect
+            'e': 5,          # maximum energy of UAV
+            'B+': 0.5,       # energy increase rate when charging
+            'B-': 0.5,       # energy decrease rate when flying
+            'n': 3           # number of UAVs
         }
 
-    x_bar = hardware_specs['x_max'] // hardware_specs['d']
-    y_bar = hardware_specs['y_max'] // hardware_specs['d']
+    pic = pa.uav_ugv_trajectory_generation(x_bar=48, y_bar=32, specs=hardware_specs, draw_ugv=False)
 
-    # print out all possible combinations of partition sizes
-
-    partition_sizes = []
-
-    for y in range(1, y_bar+1):
-
-        for x in range(1, x_bar+1):
-            partition_sizes.append([x, y])
-
-    for partition_size in partition_sizes:
-
-        # print(partition_size)
-
-        small_x = partition_size[0]
-        small_y = partition_size[1]
-
-        test, ugv_points = uav_ugv_trajectory_generation(small_x, small_y, x_bar, y_bar, specs=hardware_specs)
+    pic.show_fig()
 
 
-    # picasso, mid = uav_ugv_trajectory_generation(3, 3, 10, 11)
-    # picasso.show_fig()

@@ -14,7 +14,6 @@ if __name__ == "__main__":
     k = 3  # number of uavs
 
     land = Environment(width=m, height=n)
-    cities = land.get_cities
 
     picasso = Draw(environment=land)
     picasso.draw_environment(title='Path Planning with Multiple Drones')
@@ -23,21 +22,20 @@ if __name__ == "__main__":
     # only run the following code if number of UAVs is greater than 0
     if k > 0:
 
-        total_path_length = 0
         start_time = time.time()
 
         # this will split up the uav routes
-        uav_routes, split = gumo.get_uav_routes(environment=land, number_of_uavs=k)
-        gumo.get_route_data(uav_routes)
+        uav_paths, split = gumo.get_uav_paths(environment=land, number_of_uavs=k)
+        print(gumo.calculate_route_data(uav_paths))
 
         colors = ['blue', 'maroon', 'yellow', 'gray', 'green']
 
-        for i, key in enumerate(uav_routes):
+        for i, key in enumerate(uav_paths):
 
-            path = uav_routes[key]
+            path = uav_paths[key]
             picasso.draw_path(path=path, color=colors[i])
 
-        print("--- %s seconds ---" % (time.time() - start_time))
+        print("\n--- run time: %s seconds ---" % (time.time() - start_time))
 
         # this will visualize how the environment was split
         picasso.draw_split(split)

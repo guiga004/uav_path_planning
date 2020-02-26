@@ -59,18 +59,21 @@ class Draw:
             circle = plt.Circle((city[0], city[1]), radius=0.1, fc='lightskyblue', ec='black')
             self.draw.add_patch(circle)
 
-    def draw_split(self, points):
+    def draw_split(self, points, center=None):
         """
         :param points   : list of split points that will partition the environment
         :return         : N/A
         """
+
+        if center == None:
+            center = self.environment.center[0]
         for point in points:
 
-            line = plt.Line2D((self.environment.center[0], point[0]), (self.environment.center[1], point[1]), lw=3,
+            line = plt.Line2D((center, point[0]), (center, point[1]), lw=3,
                               color='green')
             self.draw.add_line(line)
 
-    def draw_path(self, path, color, draw=False):
+    def draw_path(self, path, color, width=0.09):
         """
         :param path     : this is list calculated by a tsp solver
         :param color    : color of the arrow being drawn
@@ -85,10 +88,9 @@ class Draw:
             dy = path[v + 1][1] - y
 
             # create an arrow
-            arrow = plt.arrow(x, y, dx, dy, width=0.09, facecolor=color, edgecolor='black', zorder=10)
+            arrow = plt.arrow(x, y, dx, dy, width=width, facecolor=color, edgecolor='black', zorder=10)
 
-            if draw:
-                self.draw.add_patch(arrow)
+            self.draw.add_patch(arrow)
 
     def show_fig(self):
         """
