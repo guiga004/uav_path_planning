@@ -1,6 +1,8 @@
 import random
 from draw import Draw
 import paper_algorithms as pa
+import guiga_algorithms as gumo
+from tsp_algorithms import exact_tsp
 import matplotlib.pyplot as plt
 from environment import Environment
 
@@ -22,6 +24,32 @@ def generate_new_color(existing_colors, pastel_factor=0.5):
             max_distance = best_distance
             best_color = color
     return best_color
+
+def test_optimality_of_partitions():
+    a1 = 2
+    a2 = 5
+    x_bar = 10
+    y_bar = 10
+
+    partitions = pa.partitioning(a1, a2, x_bar, y_bar)
+    partition_midpoints = []
+
+    # calculate all of the midpoints of the partitions
+    for part in partitions:
+        bottom_corner = (part[0][0], part[1][0])
+        width_x = part[0][1] - part[0][0]
+        height_y = part[1][1] - part[1][0]
+        partition_midpoints.append((bottom_corner[0] + width_x / 2, bottom_corner[1] + height_y / 2))
+        print((bottom_corner[0] + width_x / 2, bottom_corner[1] + height_y / 2))
+
+    partition_length = gumo.get_path_length(partition_midpoints)
+    print(f'partitions_length: {partition_length}')
+
+    tsp_midpoints = exact_tsp(partition_midpoints)
+    for city in tsp_midpoints:
+        print(city)
+    optimal_length = gumo.get_path_length(exact_tsp(partition_midpoints))
+    print(f'tsp_length: {optimal_length}')
 
 
 if __name__ == "__main__":
@@ -46,5 +74,7 @@ if __name__ == "__main__":
     pic = pa.uav_ugv_trajectory_generation(x_bar=10, y_bar=10, specs=hardware_specs)
 
     pic.show_fig()
+
+    test_optimality_of_partitions()
 
 
