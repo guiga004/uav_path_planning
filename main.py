@@ -3,9 +3,9 @@ author : Mohammed Guiga
 email  : guiga004@umn.edu
 """
 import time
-from environment import Environment
-from draw import Draw
-import guiga_algorithms as gumo
+from tools.environment import Environment
+from tools.draw import Draw
+import tools.guiga_algorithms as gumo
 
 if __name__ == "__main__":
 

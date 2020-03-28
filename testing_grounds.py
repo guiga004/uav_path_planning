@@ -1,16 +1,16 @@
 import random
-from draw import Draw
-import paper_algorithms as pa
-import guiga_algorithms as gumo
-from tsp_algorithms import exact_tsp
-import matplotlib.pyplot as plt
-from environment import Environment
+import tools.paper_algorithms as pa
+import tools.guiga_algorithms as gumo
+from tsp_algorithms.tsp_algorithms import exact_tsp
+
 
 def get_random_color(pastel_factor=0.5):
     return [(x + pastel_factor) / (1.0 + pastel_factor) for x in [random.uniform(0, 1.0) for i in [1, 2, 3]]]
 
+
 def color_distance(c1, c2):
     return sum([abs(x[0] - x[1]) for x in zip(c1, c2)])
+
 
 def generate_new_color(existing_colors, pastel_factor=0.5):
     max_distance = None
@@ -24,6 +24,7 @@ def generate_new_color(existing_colors, pastel_factor=0.5):
             max_distance = best_distance
             best_color = color
     return best_color
+
 
 def test_optimality_of_partitions():
     a1 = 2
@@ -62,19 +63,22 @@ if __name__ == "__main__":
 
     hardware_specs = \
         {
-            'uG_max': 5,   # the max speed of a UGV
-            'uA_max': 1,     # the max speed of a UAV
-            'd': 2,          # square detection footprint a dxd square that the UAV can detect
-            'e': 5,          # maximum energy of UAV
-            'B+': 0.5,       # energy increase rate when charging
-            'B-': 0.5,       # energy decrease rate when flying
-            'n': 3           # number of UAVs
+            'uG_max': 5,  # the max speed of a UGV
+            'uA_max': 1,  # the max speed of a UAV
+            'd': 1,       # square detection footprint a dxd square that the UAV can detect
+            'e': 5,       # maximum energy of UAV
+            'B+': 0.5,    # energy increase rate when charging
+            'B-': 0.5,    # energy decrease rate when flying
+            'n': 3,       # number of UAVs
         }
 
-    pic = pa.uav_ugv_trajectory_generation(x_bar=10, y_bar=10, specs=hardware_specs)
+    environment_specs = {'x_max': 10, 'y_max': 11, }
+
+    # normalize the coordinates by the UAV detection footprint
+    x_bar = environment_specs['x_max'] // hardware_specs['d']
+    y_bar = environment_specs['y_max'] // hardware_specs['d']
+
+    pic = pa.uav_ugv_trajectory_generation(x_bar=x_bar, y_bar=y_bar, specs=hardware_specs)
 
     pic.show_fig()
-
-    test_optimality_of_partitions()
-
 

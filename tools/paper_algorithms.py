@@ -3,12 +3,12 @@ author : Mohammed Guiga
 email  : guiga004@umn.edu
 """
 import math
-from environment import Environment
+from tools.environment import Environment
 import testing_grounds as tg
-import guiga_algorithms as gumo
+import tools.guiga_algorithms as gumo
 import matplotlib.pyplot as plt
-from tsp_algorithms import exact_tsp
-from draw import Draw
+from tsp_algorithms.tsp_algorithms import exact_tsp
+from tools.draw import Draw
 
 '''
 Taken from:
@@ -16,6 +16,8 @@ ALGORITHM 1 from  S.Seyedi, Y.Yazicioglu, and D.Aksaray.
 Persistent surveillance with energy-constrained uavs and mobile charging stations.
 arXiv preprint arXiv:1908.05727,2019.
 '''
+
+
 def partitioning(a1, a2, x, y):
     """
     :param a1: width of sub partition
@@ -27,17 +29,17 @@ def partitioning(a1, a2, x, y):
 
     P = []
 
-    for k1 in range(1, math.ceil(x/a1)):
-        for k2 in range(1, math.ceil(y/a2)):
-            P.append([[(k1-1)*a1, k1*a1], [(k2-1)*a2, k2*a2], 9, 0.8])
+    for k1 in range(1, math.ceil(x / a1)):
+        for k2 in range(1, math.ceil(y / a2)):
+            P.append([[(k1 - 1) * a1, k1 * a1], [(k2 - 1) * a2, k2 * a2], 9, 0.8])
 
-    for k in range(1, math.ceil(y/a2)):
-        P.append([[x-a1, x], [(k-1)*a2, k*a2], 6, 1])
+    for k in range(1, math.ceil(y / a2)):
+        P.append([[x - a1, x], [(k - 1) * a2, k * a2], 6, 1])
 
-    for k in range(1, math.ceil(x/a1)):
-        P.append([[(k-1)*a1, k*a1], [y-a2, y], 3, 0.8])
+    for k in range(1, math.ceil(x / a1)):
+        P.append([[(k - 1) * a1, k * a1], [y - a2, y], 3, 0.8])
 
-    P.append([[x-a1, x], [y-a2, y], 0, 1])
+    P.append([[x - a1, x], [y - a2, y], 0, 1])
 
     return P
 
@@ -50,13 +52,15 @@ def uav_can_cover(path_length, B_min, uA_max, e):
     :param e:           the max energy of a UAV
     :return:            boolean: true if the uav can cover this partition size
     """
-    return (path_length*B_min)/uA_max <= e
+    return (path_length * B_min) / uA_max <= e
 
 
 '''
 Adapted from:
 ALGORITHM 2 from  S.Seyedi, Y.Yazicioglu, and D.Aksaray.    
 '''
+
+
 def partition_feasibility_check(e, uA_max, B_min, environment, n, m=1):
     """
     :param e            : maximum energy of UAV
@@ -80,19 +84,18 @@ def partition_feasibility_check(e, uA_max, B_min, environment, n, m=1):
 
 
 def find_feasible_partitions(x_bar, y_bar, specs):
-
     # calculate all possible combinations of partition sizes
     partition_sizes = []
     feasible = []
 
-    for y in range(2, y_bar+1):
+    for y in range(1, y_bar + 1):
 
-        for x in range(2, x_bar+1):
+        for x in range(1, x_bar + 1):
 
-            # constraint of UAV square detection footprint
-            if (x*y)/specs['n'] < specs['d']*specs['d']:
+            if y == 1 and x == 1:
+                continue
 
-                partition_sizes.append([x, y])
+            partition_sizes.append([x, y])
 
     for partition_size in partition_sizes:
 
@@ -110,17 +113,20 @@ def find_feasible_partitions(x_bar, y_bar, specs):
 
     return feasible
 
+
 '''
 Adapted from:
 ALGORITHM 3 from  S.Seyedi, Y.Yazicioglu, and D.Aksaray.    
 Persistent surveillance with energy-constrained uavs and mobile charging stations.
 arXiv preprint arXiv:1908.05727,2019.
 '''
-def uav_ugv_trajectory_generation(x_bar, y_bar, specs=None, draw=True, draw_ugv=True, draw_uav=True):
 
+
+def uav_ugv_trajectory_generation(x_bar, y_bar, specs=None, draw=True, draw_ugv=True, draw_uav=True):
     picasso = None
     feasible = find_feasible_partitions(x_bar, y_bar, specs)
 
+    # these will get updated iteratively
     min_env = None
     min_partitions = None
     min_drones = None
@@ -163,6 +169,7 @@ def uav_ugv_trajectory_generation(x_bar, y_bar, specs=None, draw=True, draw_ugv=
 
     print('*** WINNER ****')
     print(f'environment size : {x_bar}x{y_bar}')
+    print(f"number of UAVs   : {specs['n']}")
     print(f'partition size   : {min_env.width}x{min_env.height}')
     print(f'total time       : {min_time}')
 
@@ -170,7 +177,7 @@ def uav_ugv_trajectory_generation(x_bar, y_bar, specs=None, draw=True, draw_ugv=
         picasso = Draw()
 
         colors = []
-        for i in range(len(min_partitions)):
+        for _ in range(len(min_partitions)):
             colors.append(tg.generate_new_color(colors, pastel_factor=0.9))
 
     for partition in min_partitions:
@@ -185,8 +192,8 @@ def uav_ugv_trajectory_generation(x_bar, y_bar, specs=None, draw=True, draw_ugv=
         height_y = partition[1][1] - partition[1][0]
 
         if draw:
-            rectangle = plt.Rectangle\
-                (
+            rectangle = plt.Rectangle \
+                    (
                     xy=bottom_corner,
                     width=width_x,
                     height=height_y,
@@ -201,7 +208,7 @@ def uav_ugv_trajectory_generation(x_bar, y_bar, specs=None, draw=True, draw_ugv=
 
     if draw_ugv:
         min_midpoints = exact_tsp(min_midpoints)  # run tsp on the ugv route
-        min_midpoints.append(min_midpoints[0])    # have the ugv complete the route
+        min_midpoints.append(min_midpoints[0])  # have the ugv complete the route
         picasso.draw_path(min_midpoints, 'white', width=0.15)
 
     if draw_uav:
@@ -210,8 +217,4 @@ def uav_ugv_trajectory_generation(x_bar, y_bar, specs=None, draw=True, draw_ugv=
             path = min_drones[0][key]
             picasso.draw_path(path=path, color='black')
 
-        # this will visualize how the environment was split
-        # picasso.draw_split(min_drones[1], center=min_midpoints[0])
-
     return picasso
-

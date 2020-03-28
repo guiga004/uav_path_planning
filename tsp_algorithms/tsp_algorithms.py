@@ -1,6 +1,6 @@
 import tsp
-import Ants_python as ant
-import tsp_genetic as gene
+import tsp_algorithms.Ants_python as ant
+import tsp_algorithms.tsp_genetic as gene
 
 def ant_tsp(cities):
     """

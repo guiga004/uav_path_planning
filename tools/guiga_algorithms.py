@@ -4,7 +4,7 @@ email  : guiga004@umn.edu
 """
 import math
 import numpy as np
-from tsp_algorithms import exact_tsp
+from tsp_algorithms.tsp_algorithms import exact_tsp
 
 def get_uav_paths(environment, number_of_uavs):
     """
