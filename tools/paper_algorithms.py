@@ -52,7 +52,8 @@ def uav_can_cover(path_length, B_min, uA_max, e):
     :param e:           the max energy of a UAV
     :return:            boolean: true if the uav can cover this partition size
     """
-    return (path_length * B_min) / uA_max <= e
+
+    return e - ((path_length * B_min) / uA_max) > 0
 
 
 '''
@@ -72,7 +73,7 @@ def partition_feasibility_check(e, uA_max, B_min, environment, n, m=1):
     :return             : False if not feasible, path data if feasible
     """
 
-    # this will split up the uav routes
+    # this will calculate the maximum path that a uav will travel
     uav_paths, split = gumo.get_uav_paths(environment=environment, number_of_uavs=n)
     max_path = gumo.calculate_route_data(uav_paths)
 
@@ -92,24 +93,17 @@ def find_feasible_partitions(x_bar, y_bar, specs):
 
         for x in range(1, x_bar + 1):
 
-            if y == 1 and x == 1:
+            if x*y >= 100 or x*y == 1:
                 continue
 
-            partition_sizes.append([x, y])
+            # create a new environment class based on the partition size
+            environment = Environment(width=x, height=y)
 
-    for partition_size in partition_sizes:
+            # check to see if the partition is feasible
+            max_path = partition_feasibility_check(specs['e'], specs['uA_max'], specs['B-'], environment, specs['n'])
 
-        small_x = partition_size[0]
-        small_y = partition_size[1]
-
-        # create a new environment class based on the partition size
-        environment = Environment(width=small_x, height=small_y)
-
-        # check to see if the partition is feasible
-        max_path = partition_feasibility_check(specs['e'], specs['uA_max'], specs['B-'], environment, specs['n'])
-
-        if max_path[0]:
-            feasible.append([environment, max_path[1], max_path[2]])
+            if max_path[0]:
+                feasible.append([environment, max_path[1], max_path[2]])
 
     return feasible
 
@@ -148,14 +142,17 @@ def uav_ugv_trajectory_generation(x_bar, y_bar, specs=None, draw=True, draw_ugv=
             height_y = part[1][1] - part[1][0]
             partition_midpoints.append((bottom_corner[0] + width_x / 2, bottom_corner[1] + height_y / 2))
 
+        # ugv_path = exact_tsp(partition_midpoints)
+        # ugv_path.append(ugv_path[0])
+        # ugv_length = gumo.get_path_length(ugv_path)
+
         ugv_length = gumo.get_path_length(partition_midpoints)
 
         ugv_time = ugv_length / specs['uG_max']
-        uav_time = partition[1] / specs['uA_max']
+        uav_time = (partition[1] / specs['uA_max']) * len(partitions)
         uav_ugv_time = ugv_time + uav_time
 
-        print(f'\nenvironment size : {x_bar}x{y_bar}')
-        print(f'partition size   : {a1}x{a2}')
+        print(f'\npartition size   : {a1}x{a2}')
         print(f'ugv time         : {ugv_time}')
         print(f'uav time         : {uav_time}')
         print(f'total time       : {uav_ugv_time}\n')
@@ -164,11 +161,11 @@ def uav_ugv_trajectory_generation(x_bar, y_bar, specs=None, draw=True, draw_ugv=
             min_env = partition[0]
             min_drones = partition[2]
             min_partitions = partitions
+            min_ugv = partition_midpoints
             min_midpoints = partition_midpoints
             min_time = uav_ugv_time
 
     print('*** WINNER ****')
-    print(f'environment size : {x_bar}x{y_bar}')
     print(f"number of UAVs   : {specs['n']}")
     print(f'partition size   : {min_env.width}x{min_env.height}')
     print(f'total time       : {min_time}')
@@ -179,6 +176,8 @@ def uav_ugv_trajectory_generation(x_bar, y_bar, specs=None, draw=True, draw_ugv=
         colors = []
         for _ in range(len(min_partitions)):
             colors.append(tg.generate_new_color(colors, pastel_factor=0.9))
+
+        first_color = colors[0]
 
     for partition in min_partitions:
 
@@ -213,8 +212,13 @@ def uav_ugv_trajectory_generation(x_bar, y_bar, specs=None, draw=True, draw_ugv=
 
     if draw_uav:
 
+        uav_colors = [first_color]
+
+        for _ in range(len(min_drones[0])+1):
+            uav_colors.append(tg.generate_new_color(colors, pastel_factor=0.3))
+
         for i, key in enumerate(min_drones[0]):
             path = min_drones[0][key]
-            picasso.draw_path(path=path, color='black')
+            picasso.draw_path(path=path, color=uav_colors[i+1])
 
     return picasso

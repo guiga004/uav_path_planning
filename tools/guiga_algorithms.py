@@ -112,8 +112,6 @@ def calculate_route_data(uav_paths):
     :return:           : a dictionary containing stats for the UAV with the max path length
     """
 
-    # these variables will store the max path and the UAV associated with it
-    max_uav = None
     max_path = 0
 
     for uav, path in uav_paths.items():
@@ -121,7 +119,6 @@ def calculate_route_data(uav_paths):
         path_length = get_path_length(path)
 
         if path_length > max_path:
-            max_uav = uav
             max_path = path_length
 
     return max_path
