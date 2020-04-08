@@ -5,20 +5,23 @@ email  : guiga004@umn.edu
 import math
 import numpy as np
 
+
 class Environment:
     """
     This defines an environment, an m x n sized grid
     """
 
-    def __init__(self, width, height):
+    def __init__(self, width, length, obstacles=None):
         """
-        :param width  : in arbitrary units
-        :param height : in arbitrary units
+        :param width     : in arbitrary units
+        :param length    : in arbitrary units
+        :param obstacles : a list of Obstacle objects
         """
         self.width = width
-        self.height = height
+        self.length = length
+        self.obstacles = obstacles
 
-        self.center = [width / 2, height / 2]
+        self.center = [width / 2, length / 2]
 
         # populate cities based on width and height
         # these cities are simply evenly spaced points in a graph
@@ -34,7 +37,7 @@ class Environment:
 
             for w in range(self.width):
 
-                for h in range(self.height):
+                for h in range(self.length):
                     # these will calculate the cities' coordinates
                     # assumption made that each city is in the center of a square on an mxn grid
                     city_w = w + 0.5
@@ -92,7 +95,7 @@ class Environment:
             return 90
 
         # quadrant 2
-        elif v_wr_c[0] < 0 and v_wr_c[1] > 0:
+        elif v_wr_c[0] < 0 < v_wr_c[1]:
             return 2
 
         # 180 degree position:
@@ -108,7 +111,7 @@ class Environment:
             return 270
 
         # quadrant 4
-        elif v_wr_c[0] > 0 and v_wr_c[1] < 0:
+        elif v_wr_c[0] > 0 > v_wr_c[1]:
             return 4
 
     def find_angle_from_center(self, point):
@@ -143,3 +146,11 @@ class Environment:
 
             else:
                 return angle
+
+
+class Voxel:
+
+    def __init__(self, coordinates, voxel_type, identity=None):
+        self.coordinates = coordinates
+        self.voxel_type = voxel_type
+        self.identity = identity
