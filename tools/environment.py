@@ -149,8 +149,45 @@ class Environment:
 
 
 class Voxel:
+    # each voxel represents a 1x1x1 3D environment space
+    def __init__(self, bottom_corner, voxel_type, identity=None):
+        self.bottom_corner = bottom_corner  # lower left corner of the voxel
+        self.voxel_type = voxel_type        # this can be 'free space' or 'obstacle' etc
+        self.identity = identity            # the identity ex. 'tree'
 
-    def __init__(self, coordinates, voxel_type, identity=None):
-        self.coordinates = coordinates
-        self.voxel_type = voxel_type
-        self.identity = identity
+    @staticmethod
+    def create_voxels(known_voxels, specs):
+        # remove empty voxel types for efficiency
+        Voxel.delete_empty_keys(known_voxels)
+
+        # create all of the Voxel objects and store them in a voxels list
+        voxel_corners = []
+        types = []
+        expanded_voxels = []
+
+        for key, values in known_voxels.items():
+            for value in values:
+                voxel_corners.append(value)
+                types.append(key)
+
+        for z in range(specs['z_max'] + 1):
+            for y in range(specs['y_max'] + 1):
+                for x in range(specs['x_max'] + 1):
+
+                    point = [x, y, z]
+                    if [x, y, z] in voxel_corners:
+                        expanded_voxels.append(Voxel(bottom_corner=point, voxel_type=types[voxel_corners.index(point)]))
+                    else:
+                        expanded_voxels.append(Voxel(bottom_corner=point, voxel_type='free space'))
+
+        return expanded_voxels
+
+    @staticmethod
+    def delete_empty_keys(dict_obj):
+        empty_keys = []
+        for dictKey in dict_obj:
+            if not dict_obj[dictKey]:
+                empty_keys.append(dictKey)
+
+        for empty_key in empty_keys:
+            del dict_obj[empty_key]

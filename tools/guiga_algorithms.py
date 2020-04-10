@@ -35,8 +35,8 @@ def get_uav_paths(environment, number_of_uavs):
 
         # this will calculate the new point for each drone's boundary
         # this is only for visualization purposes
-        vec = np.array([(environment.width / 2) + np.hypot(environment.width / 2, environment.height / 2),
-                        environment.height / 2]) - environment.center
+        vec = np.array([(environment.width / 2) + np.hypot(environment.width / 2, environment.length / 2),
+                        environment.length / 2]) - environment.center
         rot_point = R @ vec
         rotated_point = rot_point + environment.center
         rotated_points.append(list(rotated_point))

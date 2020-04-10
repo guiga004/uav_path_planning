@@ -53,16 +53,6 @@ def test_optimality_of_partitions():
     optimal_length = gumo.get_path_length(exact_tsp(partition_midpoints))
     print(f'tsp_length: {optimal_length}')
 
-
-def delete_empty_keys(dict_obj):
-    empty_keys = []
-    for dictKey in dict_obj:
-        if not dict_obj[dictKey]:
-            empty_keys.append(dictKey)
-
-    for empty_key in empty_keys:
-        del dict_obj[empty_key]
-
 if __name__ == "__main__":
     '''
     The environment is assumed to have dimensions xmax = 1584 and ymax = 1056, which
@@ -82,40 +72,19 @@ if __name__ == "__main__":
             'n'      : 3,    # number of UAVs
         }
 
-    # test multiple environment sizes
-
-    environment_specs = {'x_max': 8, 'y_max': 5, 'z_max': 10, }
+    environment_specs = {'x_max': 8, 'y_max': 2, 'z_max': 10, }
 
     # any voxel not specified below is assumed to be a 'free space'
     environment_voxels = \
         {
-            'obstacle' : [],
+            'obstacle' : [[1, 1, 0], [2, 3, 0]],
             'road'     : [],
             'water'    : [],
             'dirt'     : [],
         }
-
-    delete_empty_keys(environment_voxels)
-
-    # create all of the Voxel objects and store them in a voxels list
-    # first initialize all voxels as free spaces
-    voxel_coordinates = []
-    types = []
-    voxels = []
-    for key, value in environment_voxels:
-        voxel_coordinates.append(value)
-        types.append(key)
-
-    for z in range(environment_specs['z_max'] + 1):
-        for y in range(environment_specs['y_max'] + 1):
-            for x in range(environment_specs['x_max'] + 1):
-
-                point = [x, y, z]
-                if [x, y, z] in voxels:
-                    voxels.append(Voxel(coordinates=point, voxel_type=types[voxel_coordinates.index(point)]))
-                else:
-                    voxels.append(Voxel(coordinates=point, voxel_type='free space'))
-
+    
+    voxels = Voxel.create_voxels(environment_voxels, environment_specs)
+    
     # normalize the coordinates by the UAV detection footprint
     x_bar = environment_specs['x_max'] // hardware_specs['d']
     y_bar = environment_specs['y_max'] // hardware_specs['d']

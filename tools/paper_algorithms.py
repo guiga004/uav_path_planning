@@ -44,16 +44,16 @@ def partitioning(a1, a2, x, y):
     return P
 
 
-def uav_can_cover(path_length, B_min, uA_max, e):
+def uav_can_cover(path_length, b_min, ua_max, e):
     """
     :param path_length: the max path length calculated from each drone
-    :param B_min:       the energy depletion rate for the UAV
-    :param uA_max:      the max speed of the UAV
+    :param b_min:       the energy depletion rate for the UAV
+    :param ua_max:      the max speed of the UAV
     :param e:           the max energy of a UAV
     :return:            boolean: true if the uav can cover this partition size
     """
 
-    return e - ((path_length * B_min) / uA_max) > 0
+    return e - ((path_length * b_min) / ua_max) > 0
 
 
 '''
@@ -62,11 +62,11 @@ ALGORITHM 2 from  S.Seyedi, Y.Yazicioglu, and D.Aksaray.
 '''
 
 
-def partition_feasibility_check(e, uA_max, B_min, environment, n, m=1):
+def partition_feasibility_check(e, ua_max, b_min, environment, n, m=1):
     """
     :param e            : maximum energy of UAV
-    :param uA_max       : maximum speed of UAV
-    :param B_min        : energy depletion rate of UAV
+    :param ua_max       : maximum speed of UAV
+    :param b_min        : energy depletion rate of UAV
     :param environment  : an instance of an Environment class (small sub partition)
     :param n            : number of UAVs
     :param m            : number of UGVs
@@ -78,7 +78,7 @@ def partition_feasibility_check(e, uA_max, B_min, environment, n, m=1):
     max_path = gumo.calculate_route_data(uav_paths)
 
     # determine if the maximum path length is feasible
-    if uav_can_cover(max_path, B_min, uA_max, e):
+    if uav_can_cover(max_path, b_min, ua_max, e):
         return True, max_path, (uav_paths, split)
     else:
         return False, None
@@ -97,7 +97,7 @@ def find_feasible_partitions(x_bar, y_bar, specs):
                 continue
 
             # create a new environment class based on the partition size
-            environment = Environment(width=x, height=y)
+            environment = Environment(width=x, length=y)
 
             # check to see if the partition is feasible
             max_path = partition_feasibility_check(specs['e'], specs['uA_max'], specs['B-'], environment, specs['n'])
@@ -108,16 +108,8 @@ def find_feasible_partitions(x_bar, y_bar, specs):
     return feasible
 
 
-'''
-Adapted from:
-ALGORITHM 3 from  S.Seyedi, Y.Yazicioglu, and D.Aksaray.    
-Persistent surveillance with energy-constrained uavs and mobile charging stations.
-arXiv preprint arXiv:1908.05727,2019.
-'''
+def find_min_partitions(x_bar, y_bar, specs=None):
 
-
-def uav_ugv_trajectory_generation(x_bar, y_bar, specs=None, draw=True, draw_ugv=True, draw_uav=True):
-    picasso = None
     feasible = find_feasible_partitions(x_bar, y_bar, specs)
 
     # these will get updated iteratively
@@ -126,11 +118,11 @@ def uav_ugv_trajectory_generation(x_bar, y_bar, specs=None, draw=True, draw_ugv=
     min_drones = None
     min_time = math.inf
 
-    # iterate through the feasible partitions and find the one with the lease time
+    # iterate through the feasible partitions and find the one wi                                                                           th the lease time
     for partition in feasible:
 
         a1 = partition[0].width
-        a2 = partition[0].height
+        a2 = partition[0].length
 
         partitions = partitioning(a1, a2, x_bar, y_bar)
         partition_midpoints = []
@@ -167,8 +159,26 @@ def uav_ugv_trajectory_generation(x_bar, y_bar, specs=None, draw=True, draw_ugv=
 
     print('*** WINNER ****')
     print(f"number of UAVs   : {specs['n']}")
-    print(f'partition size   : {min_env.width}x{min_env.height}')
+    print(f'partition size   : {min_env.width}x{min_env.length}')
     print(f'total time       : {min_time}')
+
+    return min_env, min_drones, min_partitions, min_ugv, min_midpoints, min_time
+
+'''
+Adapted from:
+ALGORITHM 3 from  S.Seyedi, Y.Yazicioglu, and D.Aksaray.    
+Persistent surveillance with energy-constrained uavs and mobile charging stations.
+arXiv preprint arXiv:1908.05727,2019.
+'''
+
+
+def uav_ugv_trajectory_generation(x_bar, y_bar, specs=None, draw=True, draw_ugv=True, draw_uav=True):
+    picasso = None
+
+    minima = find_min_partitions(x_bar, y_bar, specs)
+    min_drones = minima[1]
+    min_partitions = minima[2]
+    min_midpoints = minima[4]
 
     if draw:
         picasso = Draw()
