@@ -84,6 +84,7 @@ if __name__ == "__main__":
         }
     
     voxels = Voxel.create_voxels(environment_voxels, environment_specs)
+    Voxel.draw_voxels(environment_specs['x_max'], environment_specs['y_max'], environment_specs['z_max'])
     
     # normalize the coordinates by the UAV detection footprint
     x_bar = environment_specs['x_max'] // hardware_specs['d']

@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 
+
 class Draw:
     """
     This class contains methods for environment visualization

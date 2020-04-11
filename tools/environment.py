@@ -3,7 +3,11 @@ author : Mohammed Guiga
 email  : guiga004@umn.edu
 """
 import math
+import matplotlib.pyplot as plt
 import numpy as np
+
+# This import registers the 3D projection, but is otherwise unused.
+from mpl_toolkits.mplot3d import Axes3D  # noqa: F401 unused import
 
 
 class Environment:
@@ -191,3 +195,36 @@ class Voxel:
 
         for empty_key in empty_keys:
             del dict_obj[empty_key]
+
+    @staticmethod
+    def explode(data):
+        size = np.array(data.shape) * 2
+        data_e = np.zeros(size - 1, dtype=data.dtype)
+        data_e[::2, ::2, ::2] = data
+        return data_e
+
+    @staticmethod
+    def draw_voxels(a, b, c, color='#FFD65DC0'):
+
+        # prepare some coordinates
+        max_dim = max(a, b, c)
+        x, y, z = np.indices((max_dim, max_dim, max_dim))
+
+        # draw cuboids in the top left and bottom right corners, and a link between them
+        cube = (x < a) & (y < b) & (z < c)
+
+        # combine the objects into a single boolean array
+        voxels = cube
+
+        # set the colors of each object
+        colors = np.empty(voxels.shape, dtype=object)
+        colors[cube] = color
+
+        # and plot everything
+        fig = plt.figure()
+        ax = fig.gca(projection='3d')
+        ax.voxels(voxels, facecolors=colors, edgecolor='k')
+
+        plt.title('3D Plot of Environment')
+
+        plt.show()

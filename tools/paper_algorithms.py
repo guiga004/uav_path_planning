@@ -118,7 +118,7 @@ def find_min_partitions(x_bar, y_bar, specs=None):
     min_drones = None
     min_time = math.inf
 
-    # iterate through the feasible partitions and find the one wi                                                                           th the lease time
+    # iterate through the feasible partitions and find the one with the least time
     for partition in feasible:
 
         a1 = partition[0].width
@@ -182,6 +182,7 @@ def uav_ugv_trajectory_generation(x_bar, y_bar, specs=None, draw=True, draw_ugv=
 
     if draw:
         picasso = Draw()
+        picasso.title = "Bird's Eye View"
 
         colors = []
         for _ in range(len(min_partitions)):
