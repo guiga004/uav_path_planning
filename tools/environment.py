@@ -225,6 +225,6 @@ class Voxel:
         ax = fig.gca(projection='3d')
         ax.voxels(voxels, facecolors=colors, edgecolor='k')
 
-        plt.title('3D Plot of Environment')
+        plt.title('3D Voxel Environment')
 
         plt.show()

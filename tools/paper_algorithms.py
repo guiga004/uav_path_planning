@@ -93,7 +93,7 @@ def find_feasible_partitions(x_bar, y_bar, specs):
 
         for x in range(1, x_bar + 1):
 
-            if x*y >= 100 or x*y == 1:
+            if x * y >= 100 or x * y == 1:
                 continue
 
             # create a new environment class based on the partition size
@@ -108,8 +108,7 @@ def find_feasible_partitions(x_bar, y_bar, specs):
     return feasible
 
 
-def find_min_partitions(x_bar, y_bar, specs=None):
-
+def find_min_partitions(x_bar, y_bar, specs, obstacles):
     feasible = find_feasible_partitions(x_bar, y_bar, specs)
 
     # these will get updated iteratively
@@ -128,15 +127,24 @@ def find_min_partitions(x_bar, y_bar, specs=None):
         partition_midpoints = []
 
         # calculate all of the midpoints of the partitions
+        # Todo: check for obstacles here
         for part in partitions:
             bottom_corner = (part[0][0], part[1][0])
             width_x = part[0][1] - part[0][0]
             height_y = part[1][1] - part[1][0]
-            partition_midpoints.append((bottom_corner[0] + width_x / 2, bottom_corner[1] + height_y / 2))
+            point = [bottom_corner[0] + width_x / 2, bottom_corner[1] + height_y / 2]
 
-        # ugv_path = exact_tsp(partition_midpoints)
-        # ugv_path.append(ugv_path[0])
-        # ugv_length = gumo.get_path_length(ugv_path)
+            if not overlaps_obstacle(point, obstacles):
+                # address the obstacle problem
+                #
+                pass
+
+            partition_midpoints.append(point)
+
+        # run TSP on every UGV path possibility
+        ugv_path = exact_tsp(partition_midpoints)
+        ugv_path.append(ugv_path[0])
+        ugv_length = gumo.get_path_length(ugv_path)
 
         ugv_length = gumo.get_path_length(partition_midpoints)
 
@@ -164,6 +172,14 @@ def find_min_partitions(x_bar, y_bar, specs=None):
 
     return min_env, min_drones, min_partitions, min_ugv, min_midpoints, min_time
 
+
+def overlaps_obstacle(point, obstacles):
+
+    for obstacle in obstacles:
+
+        pass
+
+
 '''
 Adapted from:
 ALGORITHM 3 from  S.Seyedi, Y.Yazicioglu, and D.Aksaray.    
@@ -172,17 +188,21 @@ arXiv preprint arXiv:1908.05727,2019.
 '''
 
 
-def uav_ugv_trajectory_generation(x_bar, y_bar, specs=None, draw=True, draw_ugv=True, draw_uav=True):
+def uav_ugv_trajectory_generation(x_bar, y_bar, specs=None, draw=True, obstacles=[]):
+
+    #TODO: for some reason setting the draw=False throws an error
+
     picasso = None
 
-    minima = find_min_partitions(x_bar, y_bar, specs)
+    minima = find_min_partitions(x_bar, y_bar, specs, obstacles)
     min_drones = minima[1]
     min_partitions = minima[2]
     min_midpoints = minima[4]
 
     if draw:
+
         picasso = Draw()
-        picasso.title = "Bird's Eye View"
+        picasso.title = "2D Top View"
 
         colors = []
         for _ in range(len(min_partitions)):
@@ -202,6 +222,7 @@ def uav_ugv_trajectory_generation(x_bar, y_bar, specs=None, draw=True, draw_ugv=
         height_y = partition[1][1] - partition[1][0]
 
         if draw:
+
             rectangle = plt.Rectangle \
                     (
                     xy=bottom_corner,
@@ -216,20 +237,27 @@ def uav_ugv_trajectory_generation(x_bar, y_bar, specs=None, draw=True, draw_ugv=
                 )
             picasso.draw.add_patch(rectangle)
 
-    if draw_ugv:
+    if draw:
+
         min_midpoints = exact_tsp(min_midpoints)  # run tsp on the ugv route
         min_midpoints.append(min_midpoints[0])  # have the ugv complete the route
         picasso.draw_path(min_midpoints, 'white', width=0.15)
 
-    if draw_uav:
-
         uav_colors = [first_color]
 
-        for _ in range(len(min_drones[0])+1):
+        for _ in range(len(min_drones[0]) + 1):
+
             uav_colors.append(tg.generate_new_color(colors, pastel_factor=0.3))
 
         for i, key in enumerate(min_drones[0]):
+
             path = min_drones[0][key]
-            picasso.draw_path(path=path, color=uav_colors[i+1])
+            picasso.draw_path(path=path, color=uav_colors[i + 1])
+
+        if obstacles:
+
+            for obstacle in obstacles:
+                circle = plt.Circle(obstacle[0], obstacle[1], facecolor='black', zorder=99)
+                picasso.draw.add_patch(circle)
 
     return picasso

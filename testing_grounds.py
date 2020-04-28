@@ -66,18 +66,18 @@ if __name__ == "__main__":
             'uG_max' : 0.5,  # max speed of a UGV
             'uA_max' : 1,    # max speed of a UAV
             'd'      : 1,    # UAV square detection footprint (dxd)
-            'e'      : 4,    # maximum energy of UAV
+            'e'      : 1,    # maximum energy of UAV
             'B+'     : 0.5,  # energy increase rate when charging
             'B-'     : 0.3,  # energy decrease rate when flying
             'n'      : 3,    # number of UAVs
         }
 
-    environment_specs = {'x_max': 8, 'y_max': 2, 'z_max': 10, }
+    environment_specs = {'x_max': 8, 'y_max': 5, 'z_max': 5, }
 
     # any voxel not specified below is assumed to be a 'free space'
     environment_voxels = \
         {
-            'obstacle' : [[1, 1, 0], [2, 3, 0]],
+            'obstacle' : [[(4, 1.5), 0.5], ],
             'road'     : [],
             'water'    : [],
             'dirt'     : [],
@@ -92,6 +92,9 @@ if __name__ == "__main__":
 
     print(f'Environment Size: {x_bar}x{y_bar}\n')
 
-    pic = pa.uav_ugv_trajectory_generation(x_bar=x_bar, y_bar=y_bar, specs=hardware_specs)
+    pic = pa.uav_ugv_trajectory_generation(x_bar=x_bar,
+                                           y_bar=y_bar,
+                                           specs=hardware_specs,
+                                           obstacles=environment_voxels['obstacle'])
 
     pic.show_fig()

@@ -22,10 +22,9 @@ class Draw:
         self.title = title
 
         width = self.environment.width
-        height = self.environment.height
+        height = self.environment.length
 
         for w in range(width + 1):
-
 
             if w == 0 or w == width:
                 line = plt.Line2D((w, w), (0, height), lw=3, color='black')
@@ -47,7 +46,7 @@ class Draw:
                     self.draw.add_line(line)
 
         # draw the center marker
-        rectangle = plt.Rectangle((self.environment.center[0]-0.2, self.environment.center[1]-0.2), .4, .4, fc='r')
+        rectangle = plt.Rectangle((self.environment.center[0] - 0.2, self.environment.center[1] - 0.2), .4, .4, fc='r')
         self.draw.add_patch(rectangle)
 
     def draw_cities(self):
@@ -69,7 +68,6 @@ class Draw:
         if center == None:
             center = self.environment.center[0]
         for point in points:
-
             line = plt.Line2D((center, point[0]), (center, point[1]), lw=3,
                               color='green')
             self.draw.add_line(line)
@@ -82,7 +80,6 @@ class Draw:
         """
 
         for v in range(len(path) - 1):
-
             x = path[v][0]
             y = path[v][1]
             dx = path[v + 1][0] - x
@@ -105,6 +102,3 @@ class Draw:
 
         # close the figure so other figures can be created
         plt.close(self.env_fig)
-
-
-

@@ -13,7 +13,7 @@ if __name__ == "__main__":
     n = 10  # height
     k = 3  # number of uavs
 
-    land = Environment(width=m, height=n)
+    land = Environment(width=m, length=n)
 
     picasso = Draw(environment=land)
     picasso.draw_environment(title='Path Planning with Multiple Drones')
