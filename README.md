@@ -11,7 +11,7 @@ Make sure that the python you are using is python 3. This can be checked using t
 
 If python 2 comes up as the version, then try this:
 
-    python3 - V
+    python3 -V
 
 If this also does not return a correct python version, then python 3 must be installed.
 
