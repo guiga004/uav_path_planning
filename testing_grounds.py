@@ -1,8 +1,10 @@
 import random
 import tools.paper_algorithms as pa
 import tools.guiga_algorithms as gumo
+import tools.informed_rrt_star as star
 from tsp_algorithms.tsp_algorithms import exact_tsp
 from tools.environment import Voxel
+import matplotlib.pyplot as plt
 
 
 def get_random_color(pastel_factor=0.5):
@@ -82,9 +84,10 @@ if __name__ == "__main__":
             'water'    : [],
             'dirt'     : [],
         }
-    
-    voxels = Voxel.create_voxels(environment_voxels, environment_specs)
-    Voxel.draw_voxels(environment_specs['x_max'], environment_specs['y_max'], environment_specs['z_max'])
+
+    # the lines below will plot a 3D voxel environment
+    # voxels = Voxel.create_voxels(environment_voxels, environment_specs)
+    # Voxel.draw_voxels(environment_specs['x_max'], environment_specs['y_max'], environment_specs['z_max'])
     
     # normalize the coordinates by the UAV detection footprint
     x_bar = environment_specs['x_max'] // hardware_specs['d']
@@ -98,3 +101,28 @@ if __name__ == "__main__":
                                            obstacles=environment_voxels['obstacle'])
 
     pic.show_fig()
+
+    # the lines below calculate the obstacle avoidance path for one obstacle
+    # this has not been incorporated to run automatically yet
+
+    for obstacle in environment_voxels['obstacle']:
+
+        print("\nStart informed rrt star planning")
+
+        # create obstacles
+        obstacleList = [
+            (obstacle[0][0], obstacle[0][1], obstacle[1]),
+        ]
+
+        # Set params
+        rrt = star.InformedRRTStar(start=[3, 1.5], goal=[5, 1.5],
+                              randArea=[-2, 15], obstacleList=obstacleList)
+        path = rrt.informed_rrt_star_search(animation=True)
+        print("Done!!")
+
+        # Plot path
+        rrt.draw_graph()
+        plt.plot([x for (x, y) in path], [y for (x, y) in path], '-r')
+        plt.grid(True)
+        plt.pause(0.01)
+        plt.show()
