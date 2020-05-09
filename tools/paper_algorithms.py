@@ -242,7 +242,7 @@ def uav_ugv_trajectory_generation(x_bar, y_bar, specs=None, obstacles=[]):
     uav_colors = [first_color]
 
     for _ in range(len(min_drones[0]) + 1):
-        uav_colors.append(tg.generate_new_color(colors, pastel_factor=0.3))
+        uav_colors.append(generate_new_color(colors, pastel_factor=0.3))
 
     for i, key in enumerate(min_drones[0]):
         path = min_drones[0][key]
