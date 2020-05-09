@@ -17,7 +17,7 @@ If this also does not return a correct python version, then python 3 must be ins
 
 The next step is to clone the repository:
 
-    git clone https://github.umn.edu/guiga004/Senior-Honors-Project.githttps://github.umn.edu/guiga004/Senior-Honors-Project.git
+    git clone https://github.umn.edu/guiga004/Senior-Honors-Project.git
 
 A few necessary packages must be installed: 
     
