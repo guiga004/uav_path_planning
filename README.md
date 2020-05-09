@@ -28,7 +28,7 @@ Check if pip or pip3 is installed using the following commands:
     pip -V
     pip3 -V
 
-You want the pip corresponding to python 3. In my case, pip3 -V showed the following:
+You want the pip corresponding to python 3. In my case, 'pip3 -V' showed the following:
 
     pip 18.1 from /usr/lib/python3/dist-packages/pip (python 3.7)
 
