@@ -1,20 +1,6 @@
 # Path Planning for Energy-Constrained UAV/UGV Teams in Persistent Surveillance Missions
 
-Unmanned Aerial Vehicles (UAVs) are gaining significant attention for large
-scale missions. These missions include drone delivery, precision agricultural,
-environmental/infrastructure monitoring, 3D modeling, patrolling, reconnais-
-sance, etc. However, one common drawback to UAVs is the length of their
-flight time. One method to overcome this constraint is to deploy an Unmanned
-Ground Vehicle (UGV) on the mission with the UAVs. The UGV will serve
-as a mobile charging station, and allow the UAVs to recharge throughout
-the mission. Moreover, route planning for these types of teams has not been
-explored extensively. This work provides a step-by-step explanation for each
-part of the algorithm developed to solve this problem. We first explore the
-Traveling Salesman Problem in order to solve the shortest cyclical path for
-one vehicle. We then discuss how to distribute waypoints fairly when dealing
-with multiple UAVs. Finally, everything is put together to provide a complete
-algorithm for UAV/UGV trajectory generation. The majority of the methods
-discussed are based on work proposed by Maini et al.
+Unmanned Aerial Vehicles (UAVs) are gaining significant attention for large-scale missions. These missions include drone delivery, precision agricultural, environmental/infrastructure monitoring, 3D modeling, patrolling, reconnaissance, etc. However, one common drawback to UAVs is the length of their flight time. One method to overcome this constraint is to deploy an Unmanned Ground Vehicle (UGV) on the mission with the UAVs. The UGV will serve as a mobile charging station, and allow the UAVs to recharge throughout the mission. 
 
 
 # Instructions
@@ -37,17 +23,15 @@ A few necessary packages must be installed:
     
     numpy, pandas, matplotlib, tsp
 
-To install the following packages using pip:
-
-    check if pip or pip3 is installed using the following commands:
+Check if pip or pip3 is installed using the following commands:
 
     pip -V
     pip3 -V
 
-    You want the pip corresponding to python 3. In my case, pip3 -V showed the following:
+You want the pip corresponding to python 3. In my case, pip3 -V showed the following:
     pip 18.1 from /usr/lib/python3/dist-packages/pip (python 3.7)
 
-    To install the packages run the following commands:
+To install the packages run the following commands:
 
     pip3 install numpy
     pip3 install pandas
